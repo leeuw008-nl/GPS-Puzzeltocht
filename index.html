@@ -22,7 +22,14 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
 <body>
 <div class="wrap">
   <h1>GPS Puzzeltocht – prototype</h1>
-  <p class="sub">Echte GPS-test: maak je huidige positie het doel en loop daarna weg.</p>
+  <p class="sub">Proeftocht: volg de GPS-aanwijzing, bereik de locatie en los daarna de puzzel op.</p>
+  <div class="card">
+    <div class="row"><span>Stap</span><strong id="step">—</strong></div>
+    <h2 id="clueTitle">Nog geen tocht gestart</h2>
+    <p id="clue" class="small">Start de proeftocht. De eerste locatie wordt automatisch aangemaakt op ongeveer 60 meter afstand.</p>
+    <button id="startTrail">Start proeftocht (3 locaties)</button>
+    <button id="resetTrail" class="secondary">Tocht opnieuw instellen</button>
+  </div>
 
   <div class="card">
     <div class="big" id="distance">— m</div>
@@ -38,14 +45,16 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
     <div class="row"><span>Doelpositie</span><strong id="target">—</strong></div>
     <label for="radius">Aankomstradius: <span id="radiusValue">30</span> m</label>
     <input id="radius" type="range" min="10" max="75" value="30" step="5">
-    <button id="setTarget">Maak huidige locatie doel</button>
+    <button id="setTarget">Maak huidige locatie doel (technische test)</button>
     <button id="clearTarget" class="secondary">Wis doel</button>
   </div>
 
   <div class="card hidden" id="puzzle">
     <h2>🎉 Locatie gevonden!</h2>
-    <p>In een echte puzzeltocht zou hier nu automatisch de volgende opdracht verschijnen.</p>
-    <p><strong>Testopdracht:</strong> kijk om je heen. Zoek het opvallende object in de buurt en noteer het antwoord.</p>
+    <p id="puzzleQuestion">Beantwoord de opdracht om verder te gaan.</p>
+    <input id="answer" type="text" placeholder="Jouw antwoord" autocomplete="off" style="width:100%;padding:13px;border:1px solid #ccd7dd;border-radius:10px;font-size:1rem">
+    <button id="checkAnswer">Controleer antwoord</button>
+    <div class="status hidden" id="answerStatus"></div>
   </div>
 
   <div class="card">
@@ -55,72 +64,65 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
 <script>
 const $=id=>document.getElementById(id);
 let current=null,target=null,reached=false,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
+let trail=null;
+try{trail=JSON.parse(localStorage.getItem('gpsPuzzleTrail')||'null')}catch{trail=null}
 const saved=localStorage.getItem('gpsPuzzleTarget');if(saved){try{target=JSON.parse(saved)}catch{target=null}}
 $('radius').addEventListener('input',e=>$('radiusValue').textContent=e.target.value);
+
 function rad(x){return x*Math.PI/180}
 function deg(x){return x*180/Math.PI}
 function norm(x){return (x%360+360)%360}
 function distance(a,b){const R=6371000,p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon);const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function bearing(a,b){const p1=rad(a.lat),p2=rad(b.lat),dl=rad(b.lon-a.lon);const y=Math.sin(dl)*Math.cos(p2);const x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);return norm(deg(Math.atan2(y,x)))}
+function destination(p,b,d){const R=6371000,br=rad(b),lat1=rad(p.lat),lon1=rad(p.lon),ang=d/R;const lat2=Math.asin(Math.sin(lat1)*Math.cos(ang)+Math.cos(lat1)*Math.sin(ang)*Math.cos(br));const lon2=lon1+Math.atan2(Math.sin(br)*Math.sin(ang)*Math.cos(lat1),Math.cos(ang)-Math.sin(lat1)*Math.sin(lat2));return{lat:deg(lat2),lon:deg(lon2)}}
 function fmtCoord(p){return p?p.lat.toFixed(5)+', '+p.lon.toFixed(5):'—'}
 function smoothHeading(next){if(deviceHeading===null){deviceHeading=next;return}const delta=(next-deviceHeading+540)%360-180;deviceHeading=norm(deviceHeading+delta*0.25)}
-function handleAbsolute(e){
- if(typeof e.alpha!=='number'||!isFinite(e.alpha))return;
- // For an absolute orientation event, alpha=0 means the top of the phone points north;
- // alpha increases counter-clockwise, so convert it to a clockwise compass heading.
- let h=norm(360-e.alpha);
- const angle=screen.orientation?.angle||0;
- h=norm(h+angle);
- smoothHeading(h);usingAbsolute=true;orientationStarted=true;update();
-}
-function handleFallback(e){
- if(usingAbsolute)return;
- if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading)){
-   smoothHeading(e.webkitCompassHeading);orientationStarted=true;update();return;
- }
- // Do not treat an arbitrary (non-absolute) alpha as a compass heading.
- // Such data has no fixed north reference and would otherwise make the arrow misleading.
-}
-function startOrientation(){
- if(orientationStarted)return;
- window.addEventListener('deviceorientationabsolute',handleAbsolute,true);
- window.addEventListener('deviceorientation',handleFallback,true);
- if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-   DeviceOrientationEvent.requestPermission(true).then(p=>{if(p!=='granted')$('status').textContent='Kompas-toegang geweigerd.'}).catch(()=>{});
- }
-}
+function handleAbsolute(e){if(typeof e.alpha!=='number'||!isFinite(e.alpha))return;let h=norm(360-e.alpha);const angle=screen.orientation?.angle||0;h=norm(h+angle);smoothHeading(h);usingAbsolute=true;orientationStarted=true;update()}
+function handleFallback(e){if(usingAbsolute)return;if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading)){smoothHeading(e.webkitCompassHeading);orientationStarted=true;update()}}
+function startOrientation(){if(orientationStarted)return;window.addEventListener('deviceorientationabsolute',handleAbsolute,true);window.addEventListener('deviceorientation',handleFallback,true);if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission(true).catch(()=>{})}}
+function setStageTarget(){if(!trail||trail.index>=trail.stages.length){target=null;return}target=trail.stages[trail.index].target;localStorage.setItem('gpsPuzzleTarget',JSON.stringify(target));reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('step').textContent=(trail.index+1)+' / '+trail.stages.length;$('clueTitle').textContent=trail.stages[trail.index].title;$('clue').textContent=trail.stages[trail.index].clue}
 function update(){
  if(!current)return;
  $('position').textContent=fmtCoord(current);$('accuracy').textContent=Math.round(current.accuracy)+' m';$('target').textContent=fmtCoord(target);
- if(!target){$('distance').textContent='— m';$('direction').textContent='Maak eerst een doel';return}
- const d=distance(current,target);$('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';
- const b=bearing(current,target);
- if(deviceHeading!==null){
-   const rel=(b-deviceHeading+540)%360-180;
-   $('arrow').style.transform='rotate('+rel+'deg)';
-   $('direction').textContent='richting doel • '+Math.round(b)+'° • kompas '+Math.round(deviceHeading)+'°';
- }else{
-   $('arrow').style.transform='rotate(0deg)';
-   $('direction').textContent='🧭 Kompas nog niet beschikbaar';
- }
+ if(trail&&trail.index<trail.stages.length){$('step').textContent=(trail.index+1)+' / '+trail.stages.length;$('clueTitle').textContent=trail.stages[trail.index].title;$('clue').textContent=trail.stages[trail.index].clue}
+ if(!target){$('distance').textContent='— m';$('direction').textContent='Start een tocht';return}
+ const d=distance(current,target);$('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';const b=bearing(current,target);
+ if(deviceHeading!==null){const rel=(b-deviceHeading+540)%360-180;$('arrow').style.transform='rotate('+rel+'deg)';$('direction').textContent='richting doel • '+Math.round(b)+'° • kompas '+Math.round(deviceHeading)+'°'}else{$('arrow').style.transform='rotate(0deg)';$('direction').textContent='🧭 Kompas nog niet beschikbaar'}
  const radius=Number($('radius').value);
  if(current.accuracy>30)$('status').textContent='GPS is minder nauwkeurig dan 30 m; wacht eventueel even.';
  else if(deviceHeading===null)$('status').textContent='GPS is goed. Houd de telefoon horizontaal en draai hem rustig rond.';
  else $('status').textContent='GPS + kompas actief.';
  $('status').className='status '+(current.accuracy>30?'warn':'');
- if(!reached&&d<=radius){reached=true;$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
+ if(!reached&&d<=radius){reached=true;$('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
 }
 function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update()}
 function onErr(e){$('status').textContent='GPS-fout: '+e.message;$('status').className='status warn'}
 if(!('geolocation'in navigator))$('status').textContent='Deze browser ondersteunt geen GPS.';
 else navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 startOrientation();
-$('setTarget').onclick=async()=>{
+
+$('startTrail').onclick=()=>{
  if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
- if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){try{await DeviceOrientationEvent.requestPermission(true)}catch{}}
- target={lat:current.lat,lon:current.lon};localStorage.setItem('gpsPuzzleTarget',JSON.stringify(target));reached=false;$('puzzle').classList.add('hidden');update();$('status').textContent='Doel opgeslagen. Loop nu weg van deze plek.';$('status').className='status ok'
+ const first=destination(current,0,60),second=destination(first,90,70),third=destination(second,180,60);
+ trail={index:0,stages:[
+  {title:'Locatie 1',clue:'Volg de pijl naar de eerste locatie.',target:first,question:'Eerste testvraag: welk woord hoort bij deze tocht? (tip: de plaatsnaam)',answer:'OMMEN'},
+  {title:'Locatie 2',clue:'Goed gedaan. Ga nu naar de volgende locatie.',target:second,question:'Tweede testvraag: hoeveel locaties telt deze proeftocht?',answer:'3'},
+  {title:'Locatie 3',clue:'Laatste locatie. Nog één keer de pijl volgen.',target:third,question:'Laatste testvraag: wat gebruik je om deze locatie te vinden?',answer:'GPS'}
+ ]};
+ localStorage.setItem('gpsPuzzleTrail',JSON.stringify(trail));setStageTarget();update();$('status').textContent='Proeftocht gestart. Volg de pijl naar locatie 1.';$('status').className='status ok';
 };
-$('clearTarget').onclick=()=>{target=null;reached=false;localStorage.removeItem('gpsPuzzleTarget');$('puzzle').classList.add('hidden');update();$('status').textContent='Doel gewist.';$('status').className='status'};
+$('checkAnswer').onclick=()=>{
+ if(!trail||!reached)return;
+ const given=$('answer').value.trim().toUpperCase(),expected=trail.stages[trail.index].answer.toUpperCase(),box=$('answerStatus');
+ box.className='status '+(given===expected?'ok':'warn');
+ if(given!==expected){box.textContent='Nog niet goed. Probeer opnieuw.';return}
+ if(trail.index<trail.stages.length-1){trail.index++;localStorage.setItem('gpsPuzzleTrail',JSON.stringify(trail));setStageTarget();update();$('status').textContent='✅ Goed antwoord. Op naar de volgende locatie.';$('status').className='status ok'}
+ else{box.textContent='🎉 Goed! De proeftocht is voltooid.';$('status').textContent='🏁 Proeftocht voltooid!';$('status').className='status ok';$('clueTitle').textContent='Proeftocht voltooid';$('clue').textContent='Alle drie locaties en opdrachten zijn afgerond.';trail=null;localStorage.removeItem('gpsPuzzleTrail');target=null;localStorage.removeItem('gpsPuzzleTarget');$('step').textContent='Klaar';update()}
+};
+$('resetTrail').onclick=()=>{trail=null;target=null;reached=false;localStorage.removeItem('gpsPuzzleTrail');localStorage.removeItem('gpsPuzzleTarget');$('puzzle').classList.add('hidden');$('step').textContent='—';$('clueTitle').textContent='Nog geen tocht gestart';$('clue').textContent='Start de proeftocht. De eerste locatie wordt automatisch aangemaakt op ongeveer 60 meter afstand.';update();$('status').textContent='Tocht opnieuw ingesteld.';$('status').className='status'};
+$('setTarget').onclick=()=>{if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}trail=null;target={lat:current.lat,lon:current.lon};localStorage.removeItem('gpsPuzzleTrail');localStorage.setItem('gpsPuzzleTarget',JSON.stringify(target));reached=false;$('puzzle').classList.add('hidden');update();$('status').textContent='Technisch testdoel opgeslagen.';$('status').className='status ok'};
+$('clearTarget').onclick=()=>{target=null;trail=null;reached=false;localStorage.removeItem('gpsPuzzleTarget');localStorage.removeItem('gpsPuzzleTrail');$('puzzle').classList.add('hidden');update();$('status').textContent='Doel gewist.';$('status').className='status'};
+if(trail){setStageTarget()}else if(target){$('step').textContent='Technische test';$('clueTitle').textContent='Technisch testdoel';$('clue').textContent='Gebruik dit alleen om GPS en kompas te testen.'}
 update();
 </script>
 </body></html>

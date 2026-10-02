@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1769aa">
+<title>GPS Puzzeltocht – test</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:620px;margin:auto;padding:18px 14px 32px}
+h1{font-size:1.45rem;margin:4px 0 6px}.sub{color:#60727e;margin:0 0 16px}
+.card{background:white;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 3px 14px #0001}
+.big{font-size:2.3rem;font-weight:700;text-align:center;margin:6px 0}.muted{color:#657782;text-align:center}
+.arrow{font-size:5rem;line-height:1;text-align:center;transition:transform .25s ease;margin:6px 0}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e7ecef}.row:last-child{border:0}
+button{width:100%;border:0;border-radius:12px;padding:13px 14px;font-size:1rem;font-weight:650;background:#1769aa;color:white;margin-top:10px}button.secondary{background:#e8eef2;color:#173042}
+label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:100%}
+.status{padding:10px 12px;border-radius:10px;background:#eef5f8;margin-top:10px}.ok{background:#eaf7ee}.warn{background:#fff5df}.hidden{display:none}
+.small{font-size:.9rem;color:#60727e;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GPS Puzzeltocht – prototype</h1>
+  <p class="sub">Echte GPS-test: maak je huidige positie het doel en loop daarna weg.</p>
+
+  <div class="card">
+    <div class="big" id="distance">— m</div>
+    <div class="muted">afstand tot doel</div>
+    <div class="arrow" id="arrow">↑</div>
+    <div class="muted" id="direction">richting nog niet beschikbaar</div>
+    <div class="status" id="status">Nog geen GPS-positie ontvangen.</div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span>GPS-positie</span><strong id="position">—</strong></div>
+    <div class="row"><span>GPS-nauwkeurigheid</span><strong id="accuracy">—</strong></div>
+    <div class="row"><span>Doelpositie</span><strong id="target">—</strong></div>
+    <label for="radius">Aankomstradius: <span id="radiusValue">30</span> m</label>
+    <input id="radius" type="range" min="10" max="75" value="30" step="5">
+    <button id="setTarget">Maak huidige locatie doel</button>
+    <button id="clearTarget" class="secondary">Wis doel</button>
+  </div>
+
+  <div class="card hidden" id="puzzle">
+    <h2>🎉 Locatie gevonden!</h2>
+    <p>In een echte puzzeltocht zou hier nu automatisch de volgende opdracht verschijnen.</p>
+    <p><strong>Testopdracht:</strong> kijk om je heen. Zoek het opvallende object in de buurt en noteer het antwoord.</p>
+  </div>
+
+  <div class="card">
+    <p class="small"><strong>Test:</strong> tik op “Maak huidige locatie doel”, loop ongeveer 50–100 meter weg en draai daarna om. De app toont afstand en richting. Bij het teruglopen verschijnt de volgende opdracht zodra je binnen de ingestelde radius komt.</p>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let current=null,target=null,previous=null,movementBearing=null,reached=false;
+const saved=localStorage.getItem('gpsPuzzleTarget'); if(saved){try{target=JSON.parse(saved)}catch{target=null}}
+$('radius').addEventListener('input',e=>$('radiusValue').textContent=e.target.value);
+function rad(x){return x*Math.PI/180} function deg(x){return x*180/Math.PI}
+function distance(a,b){const R=6371000, p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon);const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function bearing(a,b){const p1=rad(a.lat),p2=rad(b.lat),dl=rad(b.lon-a.lon);const y=Math.sin(dl)*Math.cos(p2);const x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);return (deg(Math.atan2(y,x))+360)%360}
+function fmtCoord(p){return p?`${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`:'—'}
+function update(){
+ if(!current)return;
+ $('position').textContent=fmtCoord(current); $('accuracy').textContent=Math.round(current.accuracy)+' m'; $('target').textContent=fmtCoord(target);
+ if(!target){$('distance').textContent='— m';$('direction').textContent='Maak eerst een doel';return}
+ const d=distance(current,target); $('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';
+ const b=bearing(current,target); let shown=b;
+ if(movementBearing!==null){let rel=(b-movementBearing+540)%360-180; $('arrow').style.transform=`rotate(${rel}deg)`; $('direction').textContent=`richting doel • ${Math.round(b)}°`;} else {$('arrow').style.transform=`rotate(${b}deg)`;$('direction').textContent='Loop een paar meter voor een bewegingsrichting';}
+ const radius=Number($('radius').value);
+ if(current.accuracy>30)$('status').textContent='GPS is minder nauwkeurig dan 30 m; wacht eventueel even.';
+ else $('status').textContent='GPS-positie is bruikbaar.';
+ $('status').className='status '+(current.accuracy>30?'warn':'');
+ if(!reached && d<=radius){reached=true;$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
+}
+function onPos(pos){const p={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};
+ if(previous){const d=distance(previous,p);if(d>=3)movementBearing=bearing(previous,p)} previous=p;current=p;update()}
+function onErr(e){$('status').textContent='GPS-fout: '+e.message;$('status').className='status warn'}
+if(!('geolocation' in navigator)){$('status').textContent='Deze browser ondersteunt geen GPS.'}else{navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000})}
+$('setTarget').onclick=()=>{if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}target={lat:current.lat,lon:current.lon};localStorage.setItem('gpsPuzzleTarget',JSON.stringify(target));reached=false;$('puzzle').classList.add('hidden');update();$('status').textContent='Doel opgeslagen. Loop nu weg van deze plek.';$('status').className='status ok'};
+$('clearTarget').onclick=()=>{target=null;reached=false;localStorage.removeItem('gpsPuzzleTarget');$('puzzle').classList.add('hidden');update();$('status').textContent='Doel gewist.';$('status').className='status'};
+update();
+</script>
+</body></html>

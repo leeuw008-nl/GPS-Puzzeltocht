@@ -35,7 +35,6 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
 
   <div class="stickyDistance">
     <div class="card">
-      <div class="status warn" id="reachStatus">⏳ Doel nog niet bereikt</div>
       <div class="big" id="distance">— m</div>
       <div class="muted">afstand tot doel</div>
       <div class="arrow" id="arrow">↑</div>
@@ -48,7 +47,7 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
     <div class="row"><span>GPS-positie</span><strong id="position">—</strong></div>
     <div class="row"><span>GPS-nauwkeurigheid</span><strong id="accuracy">—</strong></div>
     <div class="row"><span>Doelpositie</span><strong id="target">—</strong></div>
-    <label for="radius">Aankomstradius: <strong><span id="radiusValue">15</span> m</strong></label>
+    <label for="radius">Aankomstradius: <span id="radiusValue">15</span> m</label>
     <input id="radius" type="range" min="5" max="50" value="15" step="5">
     <button id="setTarget">Maak huidige locatie doel (technische test)</button>
     <button id="clearTarget" class="secondary">Wis doel</button>
@@ -90,13 +89,11 @@ function update(){
  if(!current)return;
  $('position').textContent=fmtCoord(current);$('accuracy').textContent=Math.round(current.accuracy)+' m';$('target').textContent=fmtCoord(target);
  if(trail&&trail.index<trail.stages.length){$('step').textContent=(trail.index+1)+' / '+trail.stages.length;$('clueTitle').textContent=trail.stages[trail.index].title;$('clue').textContent=trail.stages[trail.index].clue}
- if(!target){$('distance').textContent='— m';$('direction').textContent='Start een tocht';$('reachStatus').textContent='⏳ Geen doel ingesteld';$('reachStatus').className='status warn';return}
+ if(!target){$('distance').textContent='— m';$('direction').textContent='Start een tocht';return}
  const d=distance(current,target);$('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';const b=bearing(current,target);
  if(deviceHeading!==null){const rel=(b-deviceHeading+540)%360-180;$('arrow').style.transform='rotate('+rel+'deg)';$('direction').textContent='richting doel • '+Math.round(b)+'° • kompas '+Math.round(deviceHeading)+'°'}else{$('arrow').style.transform='rotate(0deg)';$('direction').textContent='🧭 Kompas nog niet beschikbaar'}
  const radius=Number($('radius').value');
  if(d>radius){
-   $('reachStatus').textContent='⏳ Doel nog niet bereikt';
-   $('reachStatus').className='status warn';
    if(reached){
      reached=false;
      $('puzzle').classList.add('hidden');
@@ -107,8 +104,6 @@ function update(){
    else $('status').textContent='Je bent '+Math.round(d)+' m van het doel. Ga terug naar de locatie.';
    $('status').className='status warn';
  }else{
-   $('reachStatus').textContent='🎉 Doel bereikt!';
-   $('reachStatus').className='status ok';
    if(!reached){
      reached=true;
      $('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';

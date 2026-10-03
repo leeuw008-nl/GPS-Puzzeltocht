@@ -18,7 +18,7 @@ button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:6
 input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;padding:8px;background:#fff}textarea{width:100%;resize:none}input[type=range]{width:100%;padding:0}
 .topline{display:flex;gap:7px;align-items:center}.topline input{flex:1;min-width:0}.topline button{white-space:nowrap}
 .slots{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:7px 0}.slot{padding:7px 2px;font-size:.78rem;background:#e8eef2;color:#173042}.slot.selected{background:#1769aa;color:#fff}.slot.done{font-weight:800}
-.editor{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}.editor .wide{grid-column:1/-1}
+.editor{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}.locationSetter{display:grid;grid-template-columns:minmax(145px,1.15fr) 1fr 1fr;gap:6px;grid-column:1/-1}.locationSetter button{width:100%;white-space:nowrap}.locationSetter input{width:100%;min-width:0}.editor .wide{grid-column:1/-1}
 .compact{font-size:.78rem;color:#60727e}.coord{font-size:.8rem;font-weight:650}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.actions button{width:100%}
 .routes{display:grid;grid-template-columns:1fr auto;gap:6px}.routes select{min-width:0;width:100%}
@@ -47,7 +47,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
  <div class="editor">
   <strong id="selectedTitle">Locatie 1</strong>
   <span class="coord" id="selectedCoord">nog niet ingesteld</span>
-  <button id="setLocation" class="wide">📍 Stel deze locatie in op huidige positie</button>
+  <div class="locationSetter"><button id="setLocation">📍 Huidige positie</button><input id="latitudeInput" inputmode="decimal" placeholder="Breedtegraad"><input id="longitudeInput" inputmode="decimal" placeholder="Lengtegraad"></div>
   <label class="wide">Aankomstradius: <strong id="radiusValue">15</strong> m
    <input id="radius" type="range" min="5" max="50" value="15" step="5">
   </label>
@@ -131,7 +131,7 @@ function renderSlots(){
 function selectLocation(i){
  selected=i;const x=setupLocations[i];
  $('selectedTitle').textContent='Locatie '+(i+1);
- $('selectedCoord').textContent=x?fmtCoord(x):'nog niet ingesteld';
+ $('selectedCoord').textContent=x?fmtCoord(x):'nog niet ingesteld';$('latitudeInput').value=x?String(x.lat):'';$('longitudeInput').value=x?String(x.lon):'';
  $('radius').value=x?.radius||15;$('radiusValue').textContent=x?.radius||15;
  $('question').value=setupQuestions[i]||'';$('answerSetup').value=setupAnswers[i]||'';
  $('setupStatus').textContent=x?'✓ Locatie '+(i+1)+' ingesteld. Pas evt. aankomstradius aan.':'Kies deze locatie en druk op “Stel deze locatie in”.';
@@ -147,7 +147,20 @@ function setLocation(){
  saveSetup();selectLocation(selected);
  $('setupStatus').textContent='✓ Locatie '+(selected+1)+' opgeslagen op '+fmtCoord(current)+' met '+radius+' m radius.';
 }
+function setManualCoordinates(){
+ const lat=Number(String($('latitudeInput').value).replace(',','.'));
+ const lon=Number(String($('longitudeInput').value).replace(',','.'));
+ if(!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lon)||lon<-180||lon>180){
+  $('setupStatus').textContent='Voer geldige GPS-coördinaten in: breedtegraad -90 t/m 90 en lengtegraad -180 t/m 180.';return
+ }
+ const radius=Number($('radius').value)||15;
+ setupLocations[selected]={lat,lon,radius};
+ saveSetup();selectLocation(selected);
+ $('setupStatus').textContent='✓ Locatie '+(selected+1)+' handmatig ingesteld op '+fmtCoord({lat,lon})+' met '+radius+' m radius.';
+}
 $('setLocation').onclick=setLocation;
+$('latitudeInput').onchange=setManualCoordinates;
+$('longitudeInput').onchange=setManualCoordinates;
 
 function routeReady(){return setupLocations.some(Boolean)}
 function makeRoute(name){

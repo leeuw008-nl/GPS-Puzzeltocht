@@ -9,7 +9,7 @@
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
 .app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
-h1{font-size:1.25rem;margin:0}.sub{font-size:.78rem;color:#60727e;margin:0}
+h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:absolute;right:12px;top:48px;z-index:20;width:min(92vw,400px);max-height:70svh;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#1769aa;color:#fff}button.active{background:#238636}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
 input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;padding:8px;background:#fff}textarea{width:100%;resize:none}input[type=range]{width:100%;padding:0}
@@ -29,7 +29,11 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 </head>
 <body>
 <div class="app">
-<h1>GPS Puzzeltocht</h1>
+<div class="header"><h1>GPS Puzzeltocht</h1><button id="menuButton" class="menuBtn" aria-label="Menu">☰</button></div>
+<div id="menu" class="card menu hidden">
+ <strong>Opgeslagen routes</strong>
+ <div id="menuRoutes"></div>
+</div>
 
 <section id="setup" class="card">
  <div class="topline">
@@ -148,9 +152,36 @@ function saveRoute(){
  $('routeName').value=r.name;$('setupStatus').textContent='✓ Route “'+r.name+'” opgeslagen met '+r.stages.length+' locaties.';
 }
 $('saveRoute').onclick=saveRoute;
+$('menuButton').onclick=()=>{$('menu').classList.toggle('hidden')};
+document.addEventListener('click',e=>{if(!$('menu').contains(e.target)&&e.target!==$('menuButton'))$('menu').classList.add('hidden')});
 function renderRoutes(){
  const s=$('savedRoutes');s.innerHTML='<option value="">Opgeslagen routes…</option>';
  routes.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.name+' ('+r.stages.length+')';s.appendChild(o)});
+ renderMenuRoutes();
+}
+function renderMenuRoutes(){
+ const box=$('menuRoutes');box.innerHTML='';
+ if(!routes.length){box.innerHTML='<div class="compact" style="padding-top:7px">Nog geen opgeslagen routes.</div>';return}
+ routes.forEach((r,i)=>{
+  const row=document.createElement('div');row.className='menuItem';
+  const name=document.createElement('strong');name.textContent=r.name+' ('+r.stages.length+')';
+  const edit=document.createElement('button');edit.textContent='Bewerken';edit.className='secondary';edit.onclick=()=>editRoute(i);
+  const del=document.createElement('button');del.textContent='Verwijder';del.className='secondary';del.onclick=()=>deleteRoute(i);
+  row.append(name,edit,del);box.appendChild(row);
+ });
+}
+function editRoute(i){
+ const r=routes[i];if(!r)return;
+ setupLocations=Array.from({length:10},(_,n)=>r.stages[n]?{...r.stages[n].target,radius:r.stages[n].radius||15}:null);
+ setupQuestions=Array.from({length:10},(_,n)=>r.stages[n]?.question||'');
+ saveSetup();$('routeName').value=r.name;selectLocation(0);$('savedRoutes').value=String(i);$('menu').classList.add('hidden');
+}
+function deleteRoute(i){
+ const r=routes[i];if(!r)return;
+ if(!confirm('Route “'+r.name+'” verwijderen?'))return;
+ routes.splice(i,1);localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();
+ $('savedRoutes').value='';$('menu').classList.add('hidden');
+ $('setupStatus').textContent='Route verwijderd.';
 }
 $('savedRoutes').onchange=()=>{
  const r=routes[Number($('savedRoutes').value)];if(!r)return;

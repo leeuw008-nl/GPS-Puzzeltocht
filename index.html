@@ -13,7 +13,7 @@ h1{font-size:1.45rem;margin:4px 0 6px}.sub{color:#60727e;margin:0 0 16px}
 .big{font-size:2.3rem;font-weight:700;text-align:center;margin:6px 0}.muted{color:#657782;text-align:center}
 .arrow{font-size:5rem;line-height:1;text-align:center;transition:transform .25s ease;margin:6px 0}
 .row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e7ecef}.row:last-child{border:0}
-button{width:100%;border:0;border-radius:12px;padding:13px 14px;font-size:1rem;font-weight:650;background:#1769aa;color:white;margin-top:10px;cursor:pointer}button.secondary{background:#e8eef2;color:#173042}button.active{background:#16833b;color:white}
+button{width:100%;border:0;border-radius:12px;padding:13px 14px;font-size:1rem;font-weight:650;background:#1769aa;color:white;margin-top:10px}button.secondary{background:#e8eef2;color:#173042}
 label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:100%}
 .status{padding:10px 12px;border-radius:10px;background:#eef5f8;margin-top:10px}.ok{background:#eaf7ee}.warn{background:#fff5df}.hidden{display:none}
 .small{font-size:.9rem;color:#60727e;line-height:1.45}
@@ -49,7 +49,7 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
     <div class="row"><span>GPS-nauwkeurigheid</span><strong id="accuracy">—</strong></div>
     <div class="row"><span>Doelpositie</span><strong id="target">—</strong></div>
     <label for="radius">Aankomstradius: <strong><span id="radiusValue">15</span> m</strong></label>
-    <input id="radius" type="range" min="5" max="50" value="15" step="5" oninput="document.getElementById('radiusValue').textContent=this.value">
+    <input id="radius" type="range" min="5" max="50" value="15" step="5">
     <button id="setTarget">Maak huidige locatie doel (technische test)</button>
     <button id="clearTarget" class="secondary">Wis doel</button>
   </div>
@@ -72,10 +72,7 @@ let current=null,target=null,reached=false,deviceHeading=null,orientationStarted
 let trail=null;
 try{trail=JSON.parse(localStorage.getItem('gpsPuzzleTrail')||'null')}catch{trail=null}
 const saved=localStorage.getItem('gpsPuzzleTarget');if(saved){try{target=JSON.parse(saved)}catch{target=null}}
-function updateRadiusLabel(){ $('radiusValue').textContent=$('radius').value; }
-$('radius').addEventListener('input',updateRadiusLabel);
-$('radius').addEventListener('change',updateRadiusLabel);
-updateRadiusLabel();
+$('radius').addEventListener('input',e=>$('radiusValue').textContent=e.target.value);
 
 function rad(x){return x*Math.PI/180}
 function deg(x){return x*180/Math.PI}
@@ -129,8 +126,6 @@ startOrientation();
 
 $('startTrail').onclick=()=>{
  if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
- $('startTrail').classList.add('active');
- $('startTrail').textContent='✓ Proeftocht actief';
  const first=destination(current,0,60),second=destination(first,90,70),third=destination(second,180,60);
  trail={index:0,stages:[
   {title:'Locatie 1',clue:'Volg de pijl naar de eerste locatie.',target:first,question:'Eerste testvraag: welk woord hoort bij deze tocht? (tip: de plaatsnaam)',answer:'OMMEN'},
@@ -147,10 +142,7 @@ $('checkAnswer').onclick=()=>{
  if(trail.index<trail.stages.length-1){trail.index++;localStorage.setItem('gpsPuzzleTrail',JSON.stringify(trail));setStageTarget();update();$('status').textContent='✅ Goed antwoord. Op naar de volgende locatie.';$('status').className='status ok'}
  else{box.textContent='🎉 Goed! De proeftocht is voltooid.';$('status').textContent='🏁 Proeftocht voltooid!';$('status').className='status ok';$('clueTitle').textContent='Proeftocht voltooid';$('clue').textContent='Alle drie locaties en opdrachten zijn afgerond.';trail=null;localStorage.removeItem('gpsPuzzleTrail');target=null;localStorage.removeItem('gpsPuzzleTarget');$('step').textContent='Klaar';update()}
 };
-$('resetTrail').onclick=()=>{trail=null;
- $('startTrail').classList.remove('active');
- $('startTrail').textContent='Start proeftocht (3 locaties)';
-target=null;reached=false;localStorage.removeItem('gpsPuzzleTrail');localStorage.removeItem('gpsPuzzleTarget');$('puzzle').classList.add('hidden');$('step').textContent='—';$('clueTitle').textContent='Nog geen tocht gestart';$('clue').textContent='Start de proeftocht. De eerste locatie wordt automatisch aangemaakt op ongeveer 60 meter afstand.';update();$('status').textContent='Tocht opnieuw ingesteld.';$('status').className='status'};
+$('resetTrail').onclick=()=>{trail=null;target=null;reached=false;localStorage.removeItem('gpsPuzzleTrail');localStorage.removeItem('gpsPuzzleTarget');$('puzzle').classList.add('hidden');$('step').textContent='—';$('clueTitle').textContent='Nog geen tocht gestart';$('clue').textContent='Start de proeftocht. De eerste locatie wordt automatisch aangemaakt op ongeveer 60 meter afstand.';update();$('status').textContent='Tocht opnieuw ingesteld.';$('status').className='status'};
 $('setTarget').onclick=()=>{if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}trail=null;target={lat:current.lat,lon:current.lon};localStorage.removeItem('gpsPuzzleTrail');localStorage.setItem('gpsPuzzleTarget',JSON.stringify(target));reached=false;$('puzzle').classList.add('hidden');update();$('status').textContent='Technisch testdoel opgeslagen.';$('status').className='status ok'};
 $('clearTarget').onclick=()=>{target=null;trail=null;reached=false;localStorage.removeItem('gpsPuzzleTarget');localStorage.removeItem('gpsPuzzleTrail');$('puzzle').classList.add('hidden');update();$('status').textContent='Doel gewist.';$('status').className='status'};
 if(trail){setStageTarget()}else if(target){$('step').textContent='Technische test';$('clueTitle').textContent='Technisch testdoel';$('clue').textContent='Gebruik dit alleen om GPS en kompas te testen.'}

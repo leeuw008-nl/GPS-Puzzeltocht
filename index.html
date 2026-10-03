@@ -12,7 +12,7 @@
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
 .app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px}.mapView{min-height:0;flex:1;padding:0;overflow:hidden}.map{width:100%;height:100%;border-radius:14px;overflow:hidden}.mapView{position:relative}.mapRouteName{position:absolute;right:14px;top:14px;z-index:1000;max-width:70%;padding:7px 10px;background:#fff;border-radius:9px;box-shadow:0 2px 8px #0002;font-weight:750;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.routePin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#1769aa;color:#fff;border:2px solid #fff;box-shadow:0 2px 5px #0005;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem}.routePin span{transform:rotate(45deg)}.infoBtn,.mapBtn{position:relative;background:transparent;color:#173042;width:32px;height:32px;padding:2px;line-height:1;display:grid;place-items:center}.infoBtn{font-size:1.65rem;font-weight:500}.mapBtn svg{width:24px;height:24px;display:block}.mapGlass{position:absolute;width:11px;height:11px;border:2px solid currentColor;border-radius:50%;right:1px;bottom:1px;background:#f4f7f9}.mapGlass:after{content:"";position:absolute;width:6px;height:2px;background:currentColor;right:-5px;bottom:-2px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.headerActions{display:flex;align-items:center;gap:3px}
-h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:absolute;right:12px;top:48px;z-index:20;width:min(92vw,400px);max-height:70svh;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}
+h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#1769aa;color:#fff}button.active{background:#238636}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
 input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;padding:8px;background:#fff}textarea{width:100%;resize:none}input[type=range]{width:100%;padding:0}
@@ -180,9 +180,27 @@ function saveRoute(){
  $('routeName').value=r.name;$('setupStatus').textContent='✓ Route “'+r.name+'” opgeslagen met '+r.stages.length+' locaties.';
 }
 $('saveRoute').onclick=saveRoute;
-$('menuButton').onclick=()=>{$('menu').classList.toggle('hidden');$('infoView').classList.add('hidden');if(!$('menu').classList.contains('hidden')){$('mapView').classList.add('hidden');$('test').classList.add('hidden');$('setup').classList.remove('hidden')}};
-$('infoButton').onclick=()=>{const open=$('infoView').classList.contains('hidden');if(open){infoReturn=$('test').classList.contains('hidden')?($('mapView').classList.contains('hidden')?'setup':'map'):'test';$('menu').classList.add('hidden');$('setup').classList.add('hidden');$('test').classList.add('hidden');$('mapView').classList.add('hidden');$('infoView').classList.remove('hidden')}else{$('infoView').classList.add('hidden');$('setup').classList.toggle('hidden',infoReturn!=='setup');$('test').classList.toggle('hidden',infoReturn!=='test');$('mapView').classList.toggle('hidden',infoReturn!=='map')}};
-document.addEventListener('click',e=>{if(!$('menu').contains(e.target)&&e.target!==$('menuButton'))$('menu').classList.add('hidden')});
+function showView(view){
+ $('setup').classList.toggle('hidden',view!=='setup');
+ $('test').classList.toggle('hidden',view!=='test');
+ $('mapView').classList.toggle('hidden',view!=='map');
+ $('infoView').classList.toggle('hidden',view!=='info');
+ $('menu').classList.toggle('hidden',view!=='menu');
+}
+$('menuButton').onclick=()=>{
+ const open=$('menu').classList.contains('hidden');
+ if(open){showView('menu')}else{showView('setup')}
+};
+$('infoButton').onclick=()=>{
+ const open=$('infoView').classList.contains('hidden');
+ if(open){
+  infoReturn=$('test').classList.contains('hidden')?($('mapView').classList.contains('hidden')?'setup':'map'):'test';
+  showView('info');
+ }else{showView(infoReturn)}
+};
+document.addEventListener('click',e=>{
+ if(!$('menu').contains(e.target)&&e.target!==$('menuButton'))$('menu').classList.add('hidden')
+});
 function renderRoutes(){
  const s=$('savedRoutes');s.innerHTML='<option value="">Opgeslagen routes…</option>';
  routes.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.name+' ('+r.stages.length+')';s.appendChild(o)});
@@ -296,16 +314,15 @@ function updateMapRoute(){
  });
 }
 function showMap(){
- $('setup').classList.add('hidden');$('test').classList.add('hidden');$('mapView').classList.remove('hidden');
+ showView('map');
  initMap();
  updateMapRoute();
  setTimeout(()=>{map.invalidateSize();if(current)map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));updateMapLocation()},50);
 }
 function hideMap(){
- $('mapView').classList.add('hidden');
- if(testRoute)$('test').classList.remove('hidden');else $('setup').classList.remove('hidden');
+ showView(testRoute?'test':'setup');
 }
-$('mapButton').onclick=()=>{if($('mapView').classList.contains('hidden')){showMap()}else{hideMap()}};
+$('mapButton').onclick=()=>{if($('mapView').classList.contains('hidden'))showMap();else hideMap()};
 if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 startOrientation();
 $('checkAnswer').onclick=()=>{

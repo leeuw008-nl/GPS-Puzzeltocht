@@ -12,7 +12,7 @@
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
 .app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px}.mapView{min-height:0;flex:1;padding:0;overflow:hidden}.map{width:100%;height:100%;border-radius:14px;overflow:hidden}.mapView{position:relative}.mapRouteName{position:absolute;right:14px;top:14px;z-index:1000;max-width:70%;padding:7px 10px;background:#fff;border-radius:9px;box-shadow:0 2px 8px #0002;font-weight:750;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.routePin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#1769aa;color:#fff;border:2px solid #fff;box-shadow:0 2px 5px #0005;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem}.routePin span{transform:rotate(45deg)}.infoBtn,.mapBtn{position:relative;background:transparent;color:#173042;width:32px;height:32px;padding:2px;line-height:1;display:grid;place-items:center}.infoBtn{font-size:1.65rem;font-weight:500}.mapBtn svg{width:24px;height:24px;display:block}.mapGlass{position:absolute;width:11px;height:11px;border:2px solid currentColor;border-radius:50%;right:1px;bottom:1px;background:#f4f7f9}.mapGlass:after{content:"";position:absolute;width:6px;height:2px;background:currentColor;right:-5px;bottom:-2px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.headerActions{display:flex;align-items:center;gap:3px}
-h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}
+h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}.menuNav{display:grid;gap:8px}.menuNav button{text-align:left;padding:13px 12px;font-size:1rem}.routesPageList{display:grid;gap:7px}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#1769aa;color:#fff}button.active{background:#238636}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
 input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;padding:8px;background:#fff}textarea{width:100%;resize:none}input[type=range]{width:100%;padding:0}
@@ -35,9 +35,17 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <div class="header"><h1>GPS Puzzeltocht</h1><div class="headerActions"><button id="infoButton" class="infoBtn" aria-label="Informatie" title="Informatie">ⓘ</button><button id="mapButton" class="mapBtn" aria-label="Kaart" title="Kaart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.8 6.1v14L9 18l6 2 5.2-2.1v-14L15 6 9 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span class="mapGlass"></span></button><button id="menuButton" class="menuBtn" aria-label="Menu">☰</button></div></div>
 <section id="infoView" class="infoView hidden" aria-label="Informatie over GPS Puzzeltocht"><div class="infoHero"><div class="infoCircle">ⓘ</div><div><h2>Over GPS Puzzeltocht</h2><div class="infoLead">Maak en test je eigen GPS-puzzeltocht op je smartphone.</div></div></div><div class="infoSection"><h3>🧭 Zo werkt het</h3><p>Een route bestaat uit maximaal 10 locaties. Bij iedere locatie bepaal je een GPS-punt, een aankomstradius, een vraag en het juiste antwoord.</p><p>Tijdens het testen wordt een locatie pas vrijgegeven wanneer je binnen de ingestelde radius bent. Daarna beantwoord je de vraag om verder te gaan naar de volgende locatie.</p></div><div class="infoSection"><h3>📍 Locaties instellen</h3><p>Je kunt een locatie op twee manieren vastleggen:</p><ul><li><strong>Huidige positie</strong> — gebruik de GPS-positie van je telefoon.</li><li><strong>Coördinaten invoeren</strong> — vul breedtegraad en lengtegraad handmatig in.</li></ul><p>Per locatie kun je de aankomstradius instellen van 5 tot 50 meter.</p></div><div class="infoSection"><h3>❓ Vraag en antwoord</h3><p>Beschrijf bij iedere locatie de vraag of opdracht. Vul daaronder het juiste antwoord in. Tijdens het testen wordt het antwoord gecontroleerd voordat de volgende locatie wordt vrijgegeven.</p></div><div class="infoSection"><h3>💾 Routes</h3><p>Geef je route een naam en kies <strong>Opslaan</strong>. Via het menu ☰ kun je opgeslagen routes later bewerken of verwijderen. Je kunt een opgeslagen route ook direct testen.</p></div><div class="infoSection"><h3><span class="inlineMapIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.8 6.1v14L9 18l6 2 5.2-2.1v-14L15 6 9 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span class="inlineMapGlass"></span></span> Kaart</h3><p>Met het kaarticoon zie je OpenStreetMap, je huidige positie en de locaties van de geselecteerde route. De locaties worden met genummerde naalden aangegeven.</p><p>Tik op een naald voor de GPS-coördinaten, vraag en antwoord van die locatie.</p></div><div class="infoSection infoTip"><h3>💡 Tip</h3><p>Stel de locaties bij voorkeur buiten op de daadwerkelijke plekken in. Controleer daarna de route met <strong>Test huidige route</strong> voordat je hem gebruikt.</p></div><div class="infoFooter">GPS Puzzeltocht · informatie</div></section>
 <div id="menu" class="card menu hidden">
- <strong>Opgeslagen routes</strong>
- <div id="menuRoutes"></div>
+ <div class="menuNav">
+  <button id="homeMenu">🏠 Home</button>
+  <button id="routesMenu">🗂️ Routes</button>
+  <button id="playerMenu">▶️ Gebruikersscherm</button>
+ </div>
 </div>
+
+<section id="routesView" class="card hidden">
+ <div class="topline"><strong>Opgeslagen routes</strong><button id="routesHome" class="secondary">← Home</button></div>
+ <div id="routesPageList" style="margin-top:7px"></div>
+</section>
 
 <section id="setup" class="card">
  <div class="topline">
@@ -119,7 +127,7 @@ function load(){
   if(!x)return null;
   return x.lat!==undefined?{lat:x.lat,lon:x.lon,radius:Number(x.radius)||15}:null;
  });
- renderRoutes();renderSlots();selectLocation(0);
+ renderRoutes();renderRoutesPage();renderSlots();selectLocation(0);
 }
 function saveSetup(){localStorage.setItem('gpsPuzzleLocations',JSON.stringify(setupLocations));localStorage.setItem('gpsPuzzleQuestions',JSON.stringify(setupQuestions));localStorage.setItem('gpsPuzzleAnswers',JSON.stringify(setupAnswers))}
 function renderSlots(){
@@ -182,6 +190,7 @@ function saveRoute(){
 $('saveRoute').onclick=saveRoute;
 function showView(view){
  $('setup').classList.toggle('hidden',view!=='setup');
+ $('routesView').classList.toggle('hidden',view!=='routes');
  $('test').classList.toggle('hidden',view!=='test');
  $('mapView').classList.toggle('hidden',view!=='map');
  $('infoView').classList.toggle('hidden',view!=='info');
@@ -191,6 +200,10 @@ $('menuButton').onclick=()=>{
  const open=$('menu').classList.contains('hidden');
  if(open){showView('menu')}else{showView('setup')}
 };
+$('homeMenu').onclick=()=>showView('setup');
+$('routesMenu').onclick=()=>{renderRoutesPage();showView('routes')};
+$('playerMenu').onclick=()=>openPlayer();
+$('routesHome').onclick=()=>showView('setup');
 $('infoButton').onclick=()=>{
  const open=$('infoView').classList.contains('hidden');
  if(open){
@@ -198,23 +211,23 @@ $('infoButton').onclick=()=>{
   showView('info');
  }else{showView(infoReturn)}
 };
-document.addEventListener('click',e=>{
- if(!$('menu').contains(e.target)&&e.target!==$('menuButton'))$('menu').classList.add('hidden')
-});
+
 function renderRoutes(){
  const s=$('savedRoutes');s.innerHTML='<option value="">Opgeslagen routes…</option>';
  routes.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.name+' ('+r.stages.length+')';s.appendChild(o)});
  renderMenuRoutes();
 }
-function renderMenuRoutes(){
- const box=$('menuRoutes');box.innerHTML='';
- if(!routes.length){box.innerHTML='<div class="compact" style="padding-top:7px">Nog geen opgeslagen routes.</div>';return}
+function renderMenuRoutes(){}
+function renderRoutesPage(){
+ const box=$('routesPageList');box.innerHTML='';
+ if(!routes.length){box.innerHTML='<div class="status">Nog geen opgeslagen routes. Ga naar Home om een route te maken.</div>';return}
  routes.forEach((r,i)=>{
   const row=document.createElement('div');row.className='menuItem';
   const name=document.createElement('strong');name.textContent=r.name+' ('+r.stages.length+')';
   const edit=document.createElement('button');edit.textContent='Bewerken';edit.className='secondary';edit.onclick=()=>editRoute(i);
+  const test=document.createElement('button');test.textContent='Test';test.onclick=()=>startTest(r);
   const del=document.createElement('button');del.textContent='Verwijder';del.className='secondary';del.onclick=()=>deleteRoute(i);
-  row.append(name,edit,del);box.appendChild(row);
+  row.append(name,edit,test,del);box.appendChild(row);
  });
 }
 function editRoute(i){
@@ -227,8 +240,8 @@ function editRoute(i){
 function deleteRoute(i){
  const r=routes[i];if(!r)return;
  if(!confirm('Route “'+r.name+'” verwijderen?'))return;
- routes.splice(i,1);localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();
- $('savedRoutes').value='';$('menu').classList.add('hidden');
+ routes.splice(i,1);localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();renderRoutesPage();
+ $('savedRoutes').value='';
  $('setupStatus').textContent='Route verwijderd.';
 }
 $('savedRoutes').onchange=()=>{
@@ -250,12 +263,31 @@ $('testCurrent').onclick=()=>{
 $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
+function openPlayer(){
+ if(!testRoute){
+  const idx=Number($('savedRoutes').value);
+  if(routes[idx])testRoute=routes[idx];
+  else if(routes.length)testRoute=routes[0];
+ }
+ if(testRoute){
+  testIndex=0;reached=false;target=testRoute.stages[0].target;
+  $('testRouteName').textContent=testRoute.name;
+  setStage();update();showView('test');
+ }else{
+  $('testRouteName').textContent='Gebruikersscherm';
+  $('testStatus').className='status warn';
+  $('testStatus').textContent='Nog geen route beschikbaar. Maak eerst een route via Home.';
+  $('distance').textContent='—';$('target').textContent='—';$('step').textContent='—';
+  $('puzzle').classList.add('hidden');
+  showView('test');
+ }
+}
 function startTest(r){
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;
- $('setup').classList.add('hidden');$('test').classList.remove('hidden');$('testRouteName').textContent=r.name;
+ $('testRouteName').textContent=r.name;showView('test');
  setStage();update();
 }
-$('backSetup').onclick=()=>{$('test').classList.add('hidden');$('setup').classList.remove('hidden');testRoute=null};
+$('backSetup').onclick=()=>{testRoute=null;showView('setup')};
 
 function rad(x){return x*Math.PI/180}function deg(x){return x*180/Math.PI}function norm(x){return(x%360+360)%360}
 function distance(a,b){const R=6371000,p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}

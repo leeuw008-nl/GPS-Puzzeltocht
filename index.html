@@ -52,6 +52,9 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
   <label class="wide">Vraag voor deze locatie
    <textarea id="question" rows="2" placeholder="Omschrijf hier de vraag of opdracht"></textarea>
   </label>
+  <label class="wide">Antwoord voor deze locatie
+   <input id="answerSetup" placeholder="Voer het juiste antwoord in" autocomplete="off">
+  </label>
   <div id="setupStatus" class="status wide">Kies een locatie en stel die in op je huidige GPS-positie.</div>
  </div>
  <div class="actions" style="margin-top:7px">
@@ -94,13 +97,15 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <script>
 const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
-let selected=0,setupLocations=[],setupQuestions=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false;
+let selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false;
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
  try{routes=JSON.parse(localStorage.getItem('gpsPuzzleRoutes')||'[]')}catch{routes=[]}
  try{setupQuestions=JSON.parse(localStorage.getItem('gpsPuzzleQuestions')||'[]')}catch{setupQuestions=[]}
+ try{setupAnswers=JSON.parse(localStorage.getItem('gpsPuzzleAnswers')||'[]')}catch{setupAnswers=[]}
  setupQuestions=Array.from({length:10},(_,i)=>String(setupQuestions[i]||''));
+ setupAnswers=Array.from({length:10},(_,i)=>String(setupAnswers[i]||''));
  setupLocations=Array.from({length:10},(_,i)=>{
   const x=setupLocations[i];
   if(!x)return null;
@@ -108,7 +113,7 @@ function load(){
  });
  renderRoutes();renderSlots();selectLocation(0);
 }
-function saveSetup(){localStorage.setItem('gpsPuzzleLocations',JSON.stringify(setupLocations));localStorage.setItem('gpsPuzzleQuestions',JSON.stringify(setupQuestions))}
+function saveSetup(){localStorage.setItem('gpsPuzzleLocations',JSON.stringify(setupLocations));localStorage.setItem('gpsPuzzleQuestions',JSON.stringify(setupQuestions));localStorage.setItem('gpsPuzzleAnswers',JSON.stringify(setupAnswers))}
 function renderSlots(){
  $('slots').innerHTML='';
  setupLocations.forEach((x,i)=>{
@@ -121,12 +126,13 @@ function selectLocation(i){
  $('selectedTitle').textContent='Locatie '+(i+1);
  $('selectedCoord').textContent=x?fmtCoord(x):'nog niet ingesteld';
  $('radius').value=x?.radius||15;$('radiusValue').textContent=x?.radius||15;
- $('question').value=setupQuestions[i]||'';
+ $('question').value=setupQuestions[i]||'';$('answerSetup').value=setupAnswers[i]||'';
  $('setupStatus').textContent=x?'✓ Locatie '+(i+1)+' ingesteld. Pas evt. aankomstradius aan.':'Kies deze locatie en druk op “Stel deze locatie in”.';
  renderSlots();
 }
 $('radius').oninput=()=>{const v=Number($('radius').value);$('radiusValue').textContent=v;if(setupLocations[selected]){setupLocations[selected].radius=v;saveSetup()}};
 $('question').oninput=()=>{setupQuestions[selected]=$('question').value;saveSetup()};
+$('answerSetup').oninput=()=>{setupAnswers[selected]=$('answerSetup').value;saveSetup()};
 function setLocation(){
  if(!current){$('setupStatus').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
  const radius=Number($('radius').value)||15;
@@ -140,7 +146,7 @@ function routeReady(){return setupLocations.some(Boolean)}
 function makeRoute(name){
  const stages=setupLocations.filter(Boolean).map((x,i)=>({
   title:'Locatie '+(i+1),clue:i===0?'Volg de pijl naar locatie 1.':'Goed gedaan. Ga nu naar locatie '+(i+1)+'.',
-  target:{lat:x.lat,lon:x.lon},radius:x.radius,question:setupQuestions[i]?.trim()||'Testvraag bij locatie '+(i+1)+'.',answer:String(i+1)
+  target:{lat:x.lat,lon:x.lon},radius:x.radius,question:setupQuestions[i]?.trim()||'Testvraag bij locatie '+(i+1)+'.',answer:setupAnswers[i]?.trim()||String(i+1)
  }));
  return{name:name.trim()||'Nieuwe route',stages,created:new Date().toISOString()};
 }
@@ -175,6 +181,7 @@ function editRoute(i){
  const r=routes[i];if(!r)return;
  setupLocations=Array.from({length:10},(_,n)=>r.stages[n]?{...r.stages[n].target,radius:r.stages[n].radius||15}:null);
  setupQuestions=Array.from({length:10},(_,n)=>r.stages[n]?.question||'');
+ setupAnswers=Array.from({length:10},(_,n)=>r.stages[n]?.answer||'');
  saveSetup();$('routeName').value=r.name;selectLocation(0);$('savedRoutes').value=String(i);$('menu').classList.add('hidden');
 }
 function deleteRoute(i){
@@ -188,6 +195,7 @@ $('savedRoutes').onchange=()=>{
  const r=routes[Number($('savedRoutes').value)];if(!r)return;
  setupLocations=Array.from({length:10},(_,i)=>r.stages[i]?{...r.stages[i].target,radius:r.stages[i].radius||15}:null);
  setupQuestions=Array.from({length:10},(_,i)=>r.stages[i]?.question||'');
+ setupAnswers=Array.from({length:10},(_,i)=>r.stages[i]?.answer||'');
  saveSetup();$('routeName').value=r.name;selectLocation(0);
 };
 $('testSaved').onclick=()=>{
@@ -200,7 +208,7 @@ $('testCurrent').onclick=()=>{
  startTest(makeRoute($('routeName').value));
 };
 $('newRoute').onclick=()=>{
- testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
+ testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
 function startTest(r){
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;

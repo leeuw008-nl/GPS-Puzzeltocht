@@ -180,8 +180,8 @@ function saveRoute(){
  $('routeName').value=r.name;$('setupStatus').textContent='✓ Route “'+r.name+'” opgeslagen met '+r.stages.length+' locaties.';
 }
 $('saveRoute').onclick=saveRoute;
-$('menuButton').onclick=()=>{$('menu').classList.toggle('hidden');$('infoView').classList.add('hidden')};
-$('infoButton').onclick=()=>{const open=$('infoView').classList.contains('hidden');if(open){infoReturn=$('test').classList.contains('hidden')?($('mapView').classList.contains('hidden')?'setup':'map'):'test';$('setup').classList.add('hidden');$('test').classList.add('hidden');$('mapView').classList.add('hidden');$('infoView').classList.remove('hidden')}else{$('infoView').classList.add('hidden');$('setup').classList.toggle('hidden',infoReturn!=='setup');$('test').classList.toggle('hidden',infoReturn!=='test');$('mapView').classList.toggle('hidden',infoReturn!=='map')}};
+$('menuButton').onclick=()=>{$('menu').classList.toggle('hidden');$('infoView').classList.add('hidden');if(!$('menu').classList.contains('hidden')){$('mapView').classList.add('hidden');$('test').classList.add('hidden');$('setup').classList.remove('hidden')}};
+$('infoButton').onclick=()=>{const open=$('infoView').classList.contains('hidden');if(open){infoReturn=$('test').classList.contains('hidden')?($('mapView').classList.contains('hidden')?'setup':'map'):'test';$('menu').classList.add('hidden');$('setup').classList.add('hidden');$('test').classList.add('hidden');$('mapView').classList.add('hidden');$('infoView').classList.remove('hidden')}else{$('infoView').classList.add('hidden');$('setup').classList.toggle('hidden',infoReturn!=='setup');$('test').classList.toggle('hidden',infoReturn!=='test');$('mapView').classList.toggle('hidden',infoReturn!=='map')}};
 document.addEventListener('click',e=>{if(!$('menu').contains(e.target)&&e.target!==$('menuButton'))$('menu').classList.add('hidden')});
 function renderRoutes(){
  const s=$('savedRoutes');s.innerHTML='<option value="">Opgeslagen routes…</option>';
@@ -305,7 +305,7 @@ function hideMap(){
  $('mapView').classList.add('hidden');
  if(testRoute)$('test').classList.remove('hidden');else $('setup').classList.remove('hidden');
 }
-$('mapButton').onclick=()=>{$('mapView').classList.contains('hidden')?showMap():hideMap()};
+$('mapButton').onclick=()=>{if($('mapView').classList.contains('hidden')){showMap()}else{hideMap()}};
 if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 startOrientation();
 $('checkAnswer').onclick=()=>{

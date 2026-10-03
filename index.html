@@ -28,8 +28,12 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
   <div class="card">
     <div class="row"><span>Stap</span><strong id="step">—</strong></div>
     <h2 id="clueTitle">Nog geen tocht gestart</h2>
-    <p id="clue" class="small">Start de proeftocht. De eerste locatie wordt automatisch aangemaakt op ongeveer 60 meter afstand.</p>
-    <button id="startTrail">Start proeftocht (3 locaties)</button>
+    <p id="clue" class="small">Stel eerst op locatie 1, 2 en 3 de drie doelpunten in. Daarna kun je de proeftocht starten.</p>
+    <button id="setLocation1">Stel locatie 1 in op huidige positie</button>
+    <button id="setLocation2" disabled>Stel locatie 2 in op huidige positie</button>
+    <button id="setLocation3" disabled>Stel locatie 3 in op huidige positie</button>
+    <div class="status" id="locationSetup">Nog geen locaties ingesteld.</div>
+    <button id="startTrail" disabled>Start proeftocht</button>
     <button id="resetTrail" class="secondary">Tocht opnieuw instellen</button>
   </div>
 

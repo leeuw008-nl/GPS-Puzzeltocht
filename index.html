@@ -71,7 +71,10 @@ let current=null,target=null,reached=false,deviceHeading=null,orientationStarted
 let trail=null;
 try{trail=JSON.parse(localStorage.getItem('gpsPuzzleTrail')||'null')}catch{trail=null}
 const saved=localStorage.getItem('gpsPuzzleTarget');if(saved){try{target=JSON.parse(saved)}catch{target=null}}
-$('radius').addEventListener('input',e=>$('radiusValue').textContent=e.target.value);
+function updateRadiusLabel(){ $('radiusValue').textContent=String($('radius').value); }
+$('radius').addEventListener('input',updateRadiusLabel);
+$('radius').addEventListener('change',updateRadiusLabel);
+updateRadiusLabel();
 
 function rad(x){return x*Math.PI/180}
 function deg(x){return x*180/Math.PI}

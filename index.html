@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1769aa">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json">\n<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <title>GPS Puzzeltocht</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
-.app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px}.mapView{min-height:0;flex:1;padding:0;overflow:hidden}.map{width:100%;height:100%;border-radius:14px;overflow:hidden}.mapBtn{background:transparent;color:#173042;font-size:1.3rem;padding:2px 5px;line-height:1}.headerActions{display:flex;align-items:center;gap:3px}
 h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:absolute;right:12px;top:48px;z-index:20;width:min(92vw,400px);max-height:70svh;overflow:auto}.menuItem{display:grid;grid-template-columns:1fr auto auto;gap:5px;align-items:center;padding:7px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#1769aa;color:#fff}button.active{background:#238636}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
@@ -30,7 +30,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 </head>
 <body>
 <div class="app">
-<div class="header"><h1>GPS Puzzeltocht</h1><button id="menuButton" class="menuBtn" aria-label="Menu">☰</button></div>
+<div class="header"><h1>GPS Puzzeltocht</h1><div class="headerActions"><button id="mapButton" class="mapBtn" aria-label="Kaart" title="Kaart">🗺️</button><button id="menuButton" class="menuBtn" aria-label="Menu">☰</button></div></div>
 <div id="menu" class="card menu hidden">
  <strong>Opgeslagen routes</strong>
  <div id="menuRoutes"></div>
@@ -97,7 +97,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <script>
 const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
-let selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false;
+let selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null;
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
@@ -242,9 +242,9 @@ function update(){
   reached=false;$('puzzle').classList.add('hidden');$('testStatus').className='status';$('testStatus').textContent='Stap '+(testIndex+1)+' van '+testRoute.stages.length+' • '+Math.round(d)+' m naar doel • radius '+s.radius+' m';
  }
 }
-function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update()}
+function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update();updateMapLocation()}
 function onErr(e){$('testStatus').textContent='GPS-fout: '+e.message;$('testStatus').className='status warn'}
-if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+function initMap(){\n if(map)return;\n map=L.map('map',{zoomControl:true}).setView([52.5200,6.4200],15);\n L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-bijdragers'}).addTo(map);\n}\nfunction updateMapLocation(){\n if(!map||!current)return;\n const p=[current.lat,current.lon];\n if(!mapMarker)mapMarker=L.circleMarker(p,{radius:8,weight:3,fillOpacity:.85}).addTo(map);else mapMarker.setLatLng(p);\n}\nfunction showMap(){\n $('setup').classList.add('hidden');$('test').classList.add('hidden');$('mapView').classList.remove('hidden');\n initMap();\n setTimeout(()=>{map.invalidateSize();if(current)map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));updateMapLocation()},50);\n}\nfunction hideMap(){\n $('mapView').classList.add('hidden');\n if(testRoute)$('test').classList.remove('hidden');else $('setup').classList.remove('hidden');\n}\n$('mapButton').onclick=()=>{$('mapView').classList.contains('hidden')?showMap():hideMap()};\nif('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 startOrientation();
 $('checkAnswer').onclick=()=>{
  if(!testRoute||!reached)return;
@@ -253,8 +253,8 @@ $('checkAnswer').onclick=()=>{
  if(testIndex<testRoute.stages.length-1){testIndex++;setStage();update()}
  else{$('testStatus').className='status ok';$('testStatus').textContent='🏁 Route voltooid!';$('clueTitle').textContent='Route voltooid';$('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn afgerond.';$('puzzle').classList.add('hidden')}
 };
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
+if(typeof L==='undefined'){console.warn('Leaflet kon niet worden geladen.')}\nif('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
 load();
 </script>
-</body>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>\n</body>
 </html>

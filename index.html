@@ -234,10 +234,12 @@ function renderRoutesPage(){
 }
 function editRoute(i){
  const r=routes[i];if(!r)return;
+ playerMode=false;playerProgress=null;testRoute=null;
  setupLocations=Array.from({length:10},(_,n)=>r.stages[n]?{...r.stages[n].target,radius:r.stages[n].radius||15}:null);
  setupQuestions=Array.from({length:10},(_,n)=>r.stages[n]?.question||'');
  setupAnswers=Array.from({length:10},(_,n)=>r.stages[n]?.answer||'');
  saveSetup();$('routeName').value=r.name;selectLocation(0);$('savedRoutes').value=String(i);$('menu').classList.add('hidden');
+ showView('setup');
 }
 function deleteRoute(i){
  const r=routes[i];if(!r)return;

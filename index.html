@@ -92,7 +92,7 @@ function update(){
  if(!target){$('distance').textContent='— m';$('direction').textContent='Start een tocht';return}
  const d=distance(current,target);$('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';const b=bearing(current,target);
  if(deviceHeading!==null){const rel=(b-deviceHeading+540)%360-180;$('arrow').style.transform='rotate('+rel+'deg)';$('direction').textContent='richting doel • '+Math.round(b)+'° • kompas '+Math.round(deviceHeading)+'°'}else{$('arrow').style.transform='rotate(0deg)';$('direction').textContent='🧭 Kompas nog niet beschikbaar'}
- const radius=Number($('radius').value');
+ const radius=Number($('radius').value);
  if(d>radius){
    if(reached){
      reached=false;

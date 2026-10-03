@@ -95,6 +95,10 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
  </div>
  <div class="footer">GPS-nauwkeurigheid: <span id="accuracy">—</span> m · Doel: <span id="target">—</span></div>
 </section>
+
+<section id="mapView" class="card mapView hidden" aria-label="OpenStreetMap">
+ <div id="map" class="map"></div>
+</section>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -279,6 +283,5 @@ if(typeof L==='undefined'){console.warn('Leaflet kon niet worden geladen.')}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
 load();
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>

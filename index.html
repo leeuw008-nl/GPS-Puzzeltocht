@@ -131,7 +131,6 @@ $('startTrail').onclick=()=>{
  if(!current){$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
  $('startTrail').classList.add('active');
  $('startTrail').textContent='✓ Proeftocht actief';
-$('status').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
  const first=destination(current,0,60),second=destination(first,90,70),third=destination(second,180,60);
  trail={index:0,stages:[
   {title:'Locatie 1',clue:'Volg de pijl naar de eerste locatie.',target:first,question:'Eerste testvraag: welk woord hoort bij deze tocht? (tip: de plaatsnaam)',answer:'OMMEN'},

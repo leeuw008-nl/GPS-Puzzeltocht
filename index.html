@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1769aa">
+<link rel="manifest" href="manifest.json">
 <title>GPS Puzzeltocht</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
@@ -244,6 +245,7 @@ $('checkAnswer').onclick=()=>{
  if(testIndex<testRoute.stages.length-1){testIndex++;setStage();update()}
  else{$('testStatus').className='status ok';$('testStatus').textContent='🏁 Route voltooid!';$('clueTitle').textContent='Route voltooid';$('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn afgerond.';$('puzzle').classList.add('hidden')}
 };
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
 load();
 </script>
 </body>

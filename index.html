@@ -88,13 +88,26 @@ function update(){
  if(!target){$('distance').textContent='— m';$('direction').textContent='Start een tocht';return}
  const d=distance(current,target);$('distance').textContent=d<1000?Math.round(d)+' m':(d/1000).toFixed(2)+' km';const b=bearing(current,target);
  if(deviceHeading!==null){const rel=(b-deviceHeading+540)%360-180;$('arrow').style.transform='rotate('+rel+'deg)';$('direction').textContent='richting doel • '+Math.round(b)+'° • kompas '+Math.round(deviceHeading)+'°'}else{$('arrow').style.transform='rotate(0deg)';$('direction').textContent='🧭 Kompas nog niet beschikbaar'}
- const radius=Number($('radius').value);
- if(current.accuracy>30)$('status').textContent='GPS is minder nauwkeurig dan 30 m; wacht eventueel even.';
- else if(deviceHeading===null)$('status').textContent='GPS is goed. Houd de telefoon horizontaal en draai hem rustig rond.';
- else $('status').textContent='GPS + kompas actief.';
- $('status').className='status '+(current.accuracy>30?'warn':'');
- if(reached&&d>radius){reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('status').textContent='Je bent weer buiten de aankomstradius. Ga terug naar het doel.';$('status').className='status warn'}
- else if(!reached&&d<=radius){reached=true;$('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
+ const radius=Number($('radius').value');
+ if(d>radius){
+   if(reached){
+     reached=false;
+     $('puzzle').classList.add('hidden');
+     $('answer').value='';
+     $('answerStatus').className='status hidden';
+   }
+   if(current.accuracy>30)$('status').textContent='GPS is minder nauwkeurig dan 30 m; wacht eventueel even.';
+   else $('status').textContent='Je bent '+Math.round(d)+' m van het doel. Ga terug naar de locatie.';
+   $('status').className='status warn';
+ }else{
+   if(!reached){
+     reached=true;
+     $('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';
+     $('puzzle').classList.remove('hidden');
+   }
+   $('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';
+   $('status').className='status ok';
+ }
 }
 function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update()}
 function onErr(e){$('status').textContent='GPS-fout: '+e.message;$('status').className='status warn'}

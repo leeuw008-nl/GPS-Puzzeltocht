@@ -47,8 +47,8 @@ label{display:block;margin:10px 0 4px;font-weight:600}input[type=range]{width:10
     <div class="row"><span>GPS-positie</span><strong id="position">—</strong></div>
     <div class="row"><span>GPS-nauwkeurigheid</span><strong id="accuracy">—</strong></div>
     <div class="row"><span>Doelpositie</span><strong id="target">—</strong></div>
-    <label for="radius">Aankomstradius: <strong><output id="radiusValue">15</output> m</strong></label>
-    <input id="radius" type="range" min="5" max="50" value="15" step="5" oninput="document.getElementById('radiusValue').value=this.value;document.getElementById('radiusValue').textContent=this.value">
+    <label for="radius">Aankomstradius: <strong><span id="radiusValue">15</span> m</strong></label>
+    <input id="radius" type="range" min="5" max="50" value="15" step="5" oninput="document.getElementById('radiusValue').textContent=this.value">
     <button id="setTarget">Maak huidige locatie doel (technische test)</button>
     <button id="clearTarget" class="secondary">Wis doel</button>
   </div>
@@ -71,7 +71,9 @@ let current=null,target=null,reached=false,deviceHeading=null,orientationStarted
 let trail=null;
 try{trail=JSON.parse(localStorage.getItem('gpsPuzzleTrail')||'null')}catch{trail=null}
 const saved=localStorage.getItem('gpsPuzzleTarget');if(saved){try{target=JSON.parse(saved)}catch{target=null}}
-function updateRadiusLabel(){ $('radiusValue').value=$('radius').value; $('radiusValue').textContent=$('radius').value; }
+function updateRadiusLabel(){ $('radiusValue').textContent=$('radius').value; }
+$('radius').addEventListener('input',updateRadiusLabel);
+$('radius').addEventListener('change',updateRadiusLabel);
 updateRadiusLabel();
 
 function rad(x){return x*Math.PI/180}

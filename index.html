@@ -114,6 +114,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
 let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
+let playerProgress=null;
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
@@ -264,6 +265,24 @@ $('testCurrent').onclick=()=>{
 $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
+function playerProgressKey(route){
+ return 'gpsPuzzlePlayerProgress:'+String(route?.name||'').trim();
+}
+function loadPlayerProgress(route){
+ try{
+  const raw=localStorage.getItem(playerProgressKey(route));
+  if(!raw)return 0;
+  const p=JSON.parse(raw);
+  return Number.isInteger(p.index)&&p.index>=0&&p.index<route.stages.length?p.index:0;
+ }catch{return 0}
+}
+function savePlayerProgress(){
+ if(!playerMode||!testRoute)return;
+ localStorage.setItem(playerProgressKey(testRoute),JSON.stringify({index:testIndex,saved:new Date().toISOString()}));
+}
+function clearPlayerProgress(){
+ if(testRoute)localStorage.removeItem(playerProgressKey(testRoute));
+}
 function openPlayer(){
  playerMode=true;
  if(!testRoute){
@@ -271,13 +290,17 @@ function openPlayer(){
   if(routes[idx])testRoute=routes[idx];
   else if(routes.length)testRoute=routes[0];
  }
- if(testRoute){
-  testIndex=0;reached=false;target=testRoute.stages[0].target;
+ if(testRoute&&testRoute.stages.length){
+  testIndex=loadPlayerProgress(testRoute);
+  playerProgress={route:testRoute.name,index:testIndex};
+  reached=false;target=testRoute.stages[testIndex].target;
   $('testRouteName').textContent=testRoute.name;
   $('backSetup').textContent='← Home';
+  $('testStatus').className='status';
   setStage();update();showView('test');
  }else{
   $('testRouteName').textContent='Gebruikersscherm';
+  $('backSetup').textContent='← Home';
   $('testStatus').className='status warn';
   $('testStatus').textContent='Nog geen route beschikbaar. Maak eerst een route via Home.';
   $('distance').textContent='—';$('target').textContent='—';$('step').textContent='—';
@@ -285,8 +308,13 @@ function openPlayer(){
   showView('test');
  }
 }
+$('backSetup').onclick=()=>{
+ testRoute=null;playerMode=false;playerProgress=null;showView('setup')
+};
+
 function startTest(r){
  playerMode=false;
+ playerProgress=null;
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;
  $('testRouteName').textContent=r.name;$('backSetup').textContent='← Bewerken';showView('test');
  setStage();update();
@@ -365,8 +393,14 @@ $('checkAnswer').onclick=()=>{
  if(!testRoute||!reached)return;
  const s=testRoute.stages[testIndex],given=$('answer').value.trim().toUpperCase(),expected=s.answer.toUpperCase(),box=$('answerStatus');
  if(given!==expected){box.className='status warn';box.textContent='Nog niet goed. Probeer opnieuw.';return}
- if(testIndex<testRoute.stages.length-1){testIndex++;setStage();update()}
- else{$('testStatus').className='status ok';$('testStatus').textContent='🏁 Route voltooid!';$('clueTitle').textContent='Route voltooid';$('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn afgerond.';$('puzzle').classList.add('hidden')}
+ if(testIndex<testRoute.stages.length-1){
+  testIndex++;
+  if(playerMode)savePlayerProgress();
+  setStage();update()
+ }
+ else{
+  if(playerMode)clearPlayerProgress();
+  $('testStatus').className='status ok';$('testStatus').textContent=playerMode?'🏁 Route voltooid!':'🏁 Route voltooid!';$('clueTitle').textContent='Route voltooid';$('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn afgerond.';$('puzzle').classList.add('hidden')}
 };
 if(typeof L==='undefined'){console.warn('Leaflet kon niet worden geladen.')}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}

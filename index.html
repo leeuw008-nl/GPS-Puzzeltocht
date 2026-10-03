@@ -93,7 +93,8 @@ function update(){
  else if(deviceHeading===null)$('status').textContent='GPS is goed. Houd de telefoon horizontaal en draai hem rustig rond.';
  else $('status').textContent='GPS + kompas actief.';
  $('status').className='status '+(current.accuracy>30?'warn':'');
- if(!reached&&d<=radius){reached=true;$('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
+ if(reached&&d>radius){reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('status').textContent='Je bent weer buiten de aankomstradius. Ga terug naar het doel.';$('status').className='status warn'}
+ else if(!reached&&d<=radius){reached=true;$('puzzleQuestion').textContent=trail?trail.stages[trail.index].question:'Locatie gevonden. Beantwoord de opdracht.';$('puzzle').classList.remove('hidden');$('status').textContent='🎉 Binnen de aankomstradius — locatie gevonden!';$('status').className='status ok'}
 }
 function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update()}
 function onErr(e){$('status').textContent='GPS-fout: '+e.message;$('status').className='status warn'}

@@ -113,7 +113,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <script>
 const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
-let selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
+let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
@@ -265,6 +265,7 @@ $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
 function openPlayer(){
+ playerMode=true;
  if(!testRoute){
   const idx=Number($('savedRoutes').value);
   if(routes[idx])testRoute=routes[idx];
@@ -273,6 +274,7 @@ function openPlayer(){
  if(testRoute){
   testIndex=0;reached=false;target=testRoute.stages[0].target;
   $('testRouteName').textContent=testRoute.name;
+  $('backSetup').textContent='← Home';
   setStage();update();showView('test');
  }else{
   $('testRouteName').textContent='Gebruikersscherm';
@@ -284,11 +286,12 @@ function openPlayer(){
  }
 }
 function startTest(r){
+ playerMode=false;
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;
- $('testRouteName').textContent=r.name;showView('test');
+ $('testRouteName').textContent=r.name;$('backSetup').textContent='← Bewerken';showView('test');
  setStage();update();
 }
-$('backSetup').onclick=()=>{testRoute=null;showView('setup')};
+$('backSetup').onclick=()=>{testRoute=null;playerMode=false;showView('setup')};
 
 function rad(x){return x*Math.PI/180}function deg(x){return x*180/Math.PI}function norm(x){return(x%360+360)%360}
 function distance(a,b){const R=6371000,p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}

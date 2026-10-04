@@ -23,7 +23,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.actions button{width:100%}
 .routes{display:grid;grid-template-columns:1fr auto;gap:6px}.routes select{min-width:0;width:100%}
 .status{padding:7px 9px;border-radius:8px;background:#eef5f8;font-size:.8rem}.ok{background:#eaf7ee}.warn{background:#fff5df}
-.test{display:flex;flex-direction:column;min-height:0;flex:1}.test.playerModeView .playerOnly{display:block}.test.playerModeView .technicalOnly{display:none}.playerOnly{display:none}.playerProgress{height:7px;background:#e8eef2;border-radius:99px;overflow:hidden;margin-top:7px}.playerProgressFill{height:100%;background:#238636;width:0;transition:width .25s}.distance{display:grid;grid-template-columns:1fr 1fr;gap:6px}.big{font-size:2rem;font-weight:750;text-align:center}.muted{text-align:center;color:#657782;font-size:.75rem}.arrow{font-size:4.3rem;line-height:.9;text-align:center;transition:transform .25s}
+.test{display:flex;flex-direction:column;min-height:0;flex:1}.test.playerModeView .playerOnly{display:block}.test.playerModeView .technicalOnly{display:none}.playerOnly{display:none}.playerProgress{height:7px;background:#e8eef2;border-radius:99px;overflow:hidden;margin-top:7px}.playerProgressFill{height:100%;background:#238636;width:0;transition:width .25s}.playerHero{padding:14px 12px;text-align:center}.playerHero h2{margin:0 0 5px;font-size:1.25rem}.playerHero p{margin:0;color:#526772;font-size:.88rem;line-height:1.35}.playerNext{font-size:1.55rem;font-weight:800;text-align:center;margin:8px 0}.playerFound{font-size:1.05rem;font-weight:750;text-align:center}.playerModeView .distance,.playerModeView .testmain>.footer{display:none}.playerModeView .arrow{font-size:4.8rem}.playerModeView .big{font-size:2.2rem}.distance{display:grid;grid-template-columns:1fr 1fr;gap:6px}.big{font-size:2rem;font-weight:750;text-align:center}.muted{text-align:center;color:#657782;font-size:.75rem}.arrow{font-size:4.3rem;line-height:.9;text-align:center;transition:transform .25s}
 .testmain{display:grid;grid-template-columns:1fr 1fr;gap:7px}.testmain .wide{grid-column:1/-1}
 .puzzle{margin-top:7px}.puzzle input{width:100%}.hidden{display:none!important}
 .inlineMapIcon{position:relative;display:inline-grid;vertical-align:-5px;width:20px;height:20px;margin-right:3px}.inlineMapIcon svg{width:20px;height:20px;display:block}.inlineMapGlass{position:absolute;width:8px;height:8px;border:1.7px solid currentColor;border-radius:50%;right:-1px;bottom:-1px;background:#fff}.inlineMapGlass:after{content:"";position:absolute;width:5px;height:1.7px;background:currentColor;right:-4px;bottom:-1px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.infoView{flex:1;min-height:0;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 2px 10px #0001;padding:16px}.infoHero{display:flex;align-items:center;gap:12px;padding:2px 2px 14px;border-bottom:1px solid #e1e8ec}.infoCircle{width:42px;height:42px;border:2px solid #1769aa;border-radius:50%;display:grid;place-items:center;color:#1769aa;font-size:1.65rem;font-weight:500;flex:0 0 auto}.infoHero h2{font-size:1.18rem;margin:0 0 3px}.infoLead{font-size:.82rem;color:#60727e;line-height:1.35}.infoSection{padding:13px 2px;border-bottom:1px solid #e7ecef}.infoSection h3{font-size:.96rem;margin:0 0 6px;color:#173042}.infoSection p{font-size:.84rem;line-height:1.48;margin:5px 0;color:#415661}.infoSection ul{font-size:.84rem;line-height:1.5;color:#415661;margin:6px 0 5px;padding-left:20px}.infoSection li{margin:4px 0}.infoTip{background:#f4f8fa;margin:8px 0 0;padding:11px;border-radius:10px;border:0}.infoFooter{font-size:.68rem;color:#71818a;text-align:center;padding:12px 0 2px}.footer{font-size:.68rem;color:#71818a;text-align:center}
@@ -79,10 +79,16 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 </section>
 
 <section id="test" class="test hidden">
+ <div class="card playerHero playerOnly">
+  <h2 id="playerTitle">GPS Puzzeltocht</h2>
+  <p id="playerInstruction">Volg de pijl naar de volgende locatie.</p>
+  <div class="playerProgress"><div id="playerProgressFill" class="playerProgressFill"></div></div>
+  <div class="playerNext" id="playerNext">Locatie 1 van 1</div>
+ </div>
  <div class="card">
   <div class="topline"><strong id="testRouteName">Route</strong><button id="backSetup" class="secondary">← Bewerken</button></div>
-  <div class="playerOnly compact" id="playerLabel">Gebruikersscherm</div><div class="playerOnly playerProgress"><div id="playerProgressFill" class="playerProgressFill"></div></div>
-  <div class="status" id="testStatus">GPS-positie wordt gezocht…</div>
+  <div class="playerOnly compact" id="playerLabel">Deelnemersscherm</div>
+  <div class="status" id="testStatus">GPS-positie wordt gezocht…</div><div class="playerFound playerOnly" id="playerFound"></div>
  </div>
  <div class="card distance">
   <div><div class="big" id="distance">—</div><div class="muted">afstand tot doel</div></div>
@@ -289,8 +295,14 @@ function clearPlayerProgress(){
 function updatePlayerView(){
  $('test').classList.toggle('playerModeView',playerMode);
  $('backSetup').textContent=playerMode?'← Home':'← Bewerken';
- $('playerProgressFill').style.width=testRoute&&testRoute.stages.length?(((testIndex+1)/testRoute.stages.length)*100)+'%':'0%';
- $('playerLabel').textContent=playerMode?'Deelnemersscherm · stap '+(testIndex+1)+' van '+(testRoute?.stages.length||0):'';
+ const total=testRoute?.stages.length||0;
+ $('playerProgressFill').style.width=total?((testIndex/total)*100)+'%':'0%';
+ $('playerLabel').textContent=playerMode?'Deelnemersscherm':'';
+ $('playerNext').textContent=total?'Locatie '+(testIndex+1)+' van '+total:'';
+ if(testRoute){
+  $('playerTitle').textContent='Ga naar locatie '+(testIndex+1);
+  $('playerInstruction').textContent='Volg de pijl. Zodra je bij de locatie bent, verschijnt de puzzel.';
+ }
 }
 function openPlayer(){
  playerMode=true;
@@ -301,6 +313,7 @@ function openPlayer(){
  }
  if(testRoute&&testRoute.stages.length){
   testIndex=loadPlayerProgress(testRoute);
+  if(testIndex<0||testIndex>=testRoute.stages.length)testIndex=0;
   playerProgress={route:testRoute.name,index:testIndex};
   reached=false;target=testRoute.stages[testIndex].target;
   $('testRouteName').textContent=testRoute.name;
@@ -351,10 +364,26 @@ function update(){
  else{$('direction').textContent='kompas —'}
  $('testStatus').textContent=current.accuracy>30?'GPS minder nauwkeurig dan 30 m; wacht even.':('Stap '+(testIndex+1)+' van '+testRoute.stages.length+' • aankomstradius '+s.radius+' m');
  if(d<=s.radius){
-  if(!reached){reached=true;$('puzzleQuestion').textContent=s.question;$('puzzle').classList.remove('hidden')}
-  $('testStatus').className='status ok';$('testStatus').textContent='🎉 Locatie '+(testIndex+1)+' bereikt!';
+  if(!reached){
+   reached=true;
+   $('puzzleQuestion').textContent=s.question;
+   $('puzzle').classList.remove('hidden');
+   if(playerMode){
+    $('playerTitle').textContent='🎉 Locatie '+(testIndex+1)+' bereikt!';
+    $('playerInstruction').textContent='Los de puzzel op om verder te gaan naar de volgende locatie.';
+    $('playerFound').textContent='Je bent op de juiste plek.';
+   }
+  }
+  $('testStatus').className='status ok';$('testStatus').textContent=playerMode?'Locatie gevonden! Beantwoord de puzzel.':'🎉 Locatie '+(testIndex+1)+' bereikt!';
  }else{
-  reached=false;$('puzzle').classList.add('hidden');$('testStatus').className='status';$('testStatus').textContent='Stap '+(testIndex+1)+' van '+testRoute.stages.length+' • '+Math.round(d)+' m naar doel • radius '+s.radius+' m';
+  if(!reached){
+   $('puzzle').classList.add('hidden');
+   if(playerMode){
+    $('playerTitle').textContent='Ga naar locatie '+(testIndex+1);
+    $('playerInstruction').textContent='Volg de pijl. Zodra je bij de locatie bent, verschijnt de puzzel.';
+   }
+  }
+  reached=false;$('testStatus').className='status';$('testStatus').textContent=playerMode?'Op weg naar de volgende locatie…':'Stap '+(testIndex+1)+' van '+testRoute.stages.length+' • '+Math.round(d)+' m naar doel • radius '+s.radius+' m';
  }
 }
 function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update();updateMapLocation()}

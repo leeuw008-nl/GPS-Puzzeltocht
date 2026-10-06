@@ -410,8 +410,8 @@ async function fetchServerRoutes(){
   return true;
  }catch{return false}
 }
-async function syncLocalRoutesToServer(){
- if(!makerAuthorized||!routes.length)return;
+async function syncLocalRoutesToServer(localRoutes=routes){
+ if(!makerAuthorized||!localRoutes.length)return;
  try{
   const server=await authRequest('/routes');
   if(!server.ok||!Array.isArray(server.data.routes))return;
@@ -421,7 +421,7 @@ async function syncLocalRoutesToServer(){
    renderRoutes();renderRoutesPage();
    return;
   }
-  for(const r of routes){
+  for(const r of localRoutes){
    const saved=await authRequest('/routes',{method:'POST',body:JSON.stringify(r)});
    if(!saved.ok)break;
   }
@@ -622,10 +622,10 @@ async function checkAuth(){
  }catch{makerAuthorized=false}
  applyAuthUI();
  if(makerAuthorized){
-  const hadLocalRoutes=routes.length>0;
+  const localRoutes=routes.slice();
   const loaded=await fetchServerRoutes();
-  if(loaded&&routes.length===0&&hadLocalRoutes)await syncLocalRoutesToServer();
-  else if(!loaded)await syncLocalRoutesToServer();
+  if(loaded&&routes.length===0&&localRoutes.length)await syncLocalRoutesToServer(localRoutes);
+  else if(!loaded)await syncLocalRoutesToServer(localRoutes);
   showView('setup');
  }else{
   await fetchServerRoutes();
@@ -648,10 +648,10 @@ async function doLogin(){
  $('loginButton').disabled=false;
  if(r.ok&&r.data.authenticated){
   makerAuthorized=true;applyAuthUI();$('loginPassword').value='';
-  const hadLocalRoutes=routes.length>0;
+  const localRoutes=routes.slice();
   const loaded=await fetchServerRoutes();
-  if(loaded&&routes.length===0&&hadLocalRoutes)await syncLocalRoutesToServer();
-  else if(!loaded)await syncLocalRoutesToServer();
+  if(loaded&&routes.length===0&&localRoutes.length)await syncLocalRoutesToServer(localRoutes);
+  else if(!loaded)await syncLocalRoutesToServer(localRoutes);
   showView('setup');
  }else{$('loginStatus').className='status warn';$('loginStatus').textContent='Inloggen mislukt. Controleer het wachtwoord.'}
 }

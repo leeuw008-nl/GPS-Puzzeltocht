@@ -44,7 +44,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <div class="infoFooter">GPS Puzzeltocht · informatie</div>
 </div></section>
 <div id="menu" class="card menu hidden">
- <div id="loginMenu" class="menuNav"><button id="loginMenuButton">🔐 Routemaker inloggen</button></div>
+ <div id="loginMenu" class="menuNav"><button id="homeUserMenu">🏠 Home</button><button id="loginMenuButton">🔐 Routemaker inloggen</button></div>
  <div id="makerMenu" class="menuNav authOnly">
   <button id="homeMenu">🏠 Home</button>
   <button id="routesMenu">🗂️ Routes</button>
@@ -540,6 +540,7 @@ function applyAuthUI(){
  $('loginMenu').classList.toggle('authOnly',makerAuthorized);
  document.querySelector('.header').classList.toggle('loggedOut',!makerAuthorized);
 }
+$('homeUserMenu').onclick=()=>openPlayer();
 $('loginMenuButton').onclick=()=>{$('loginPassword').value='';$('loginStatus').className='status hidden';showView('login');setTimeout(()=>$('loginPassword').focus(),50)};
 $('loginCancel').onclick=()=>openPlayer();
 async function doLogin(){

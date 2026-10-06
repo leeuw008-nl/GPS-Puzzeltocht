@@ -6,7 +6,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f4f7f9",
-  "theme_color": "#1769aa",
+  "theme_color": "#0066cc",
   "description": "Maak en test GPS-puzzeltochten.",
   "icons": [
     {

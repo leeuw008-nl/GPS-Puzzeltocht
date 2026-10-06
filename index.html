@@ -211,7 +211,7 @@ $('menuButton').onclick=()=>{
 $('homeMenu').onclick=()=>showView('setup');
 $('routesMenu').onclick=()=>{renderRoutesPage();showView('routes')};
 $('playerMenu').onclick=()=>openPlayer();
-$('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=loadPlayerProgress(r);reached=false;target=r.stages[testIndex].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
+$('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=0;clearPlayerProgress();reached=false;target=r.stages[0].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
 $('routesHome').onclick=()=>showView('setup');
 $('infoButton').onclick=()=>{
  const open=$('infoView').classList.contains('hidden');

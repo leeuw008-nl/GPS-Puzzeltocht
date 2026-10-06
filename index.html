@@ -143,7 +143,7 @@ let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false
 let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
 let playerProgress=null;
 let makerAuthorized=false;
-const AUTH_API='__AUTH_API_URL__';
+const AUTH_API='https://gps-puzzeltocht-auth.leeuw008.workers.dev';
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
@@ -219,6 +219,7 @@ function saveRoute(){
 }
 $('saveRoute').onclick=saveRoute;
 function showView(view){
+ if(!makerAuthorized && ['setup','routes','map','info'].includes(view))view='test';
  $('setup').classList.toggle('hidden',view!=='setup');
  $('routesView').classList.toggle('hidden',view!=='routes');
  $('test').classList.toggle('hidden',view!=='test');
@@ -226,7 +227,6 @@ function showView(view){
  $('infoView').classList.toggle('hidden',view!=='info');
  $('menu').classList.toggle('hidden',view!=='menu');
  $('loginView').classList.toggle('hidden',view!=='login');
- if(!makerAuthorized && ['setup','routes','map','info'].includes(view)) view='test';
 }
 $('menuButton').onclick=()=>{
  const open=$('menu').classList.contains('hidden');
@@ -526,7 +526,7 @@ async function authRequest(path,options={}){
  return {ok:r.ok,data};
 }
 async function checkAuth(){
- if(AUTH_API==='__AUTH_API_URL__'){makerAuthorized=false;applyAuthUI();openPlayer();return}
+ if(!AUTH_API){makerAuthorized=false;applyAuthUI();openPlayer();return}
  try{
   const r=await authRequest('/auth/status');
   makerAuthorized=!!r.data.authenticated;

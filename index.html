@@ -248,13 +248,25 @@ function makeRoute(name){
  }));
  return{name:name.trim()||'Nieuwe route',stages,created:new Date().toISOString()};
 }
-function saveRoute(){
- if(!routeReady()){ $('setupStatus').textContent='Stel eerst minimaal één locatie in.';return}
+async function saveRoute(){
+ if(!routeReady()){$('setupStatus').textContent='Stel eerst minimaal één locatie in.';return}
  const r=makeRoute($('routeName').value);
- const existing=routes.findIndex(x=>x.name===r.name);
- if(existing>=0)routes[existing]=r;else routes.push(r);
- localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();
- $('routeName').value=r.name;$('setupStatus').textContent='✓ Route “'+r.name+'” opgeslagen met '+r.stages.length+' locaties.';
+ $('saveRoute').disabled=true;
+ try{
+  const api=await authRequest('/routes',{method:'POST',body:JSON.stringify(r)});
+  if(!api.ok)throw new Error(api.data?.error||'Opslaan op server mislukt');
+  routes=Array.isArray(api.data.routes)?api.data.routes:[r];
+  localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+  renderRoutes();
+  $('routeName').value=r.name;
+  $('setupStatus').textContent='✓ Route “'+r.name+'” server-side opgeslagen met '+r.stages.length+' locaties.';
+ }catch{
+  const existing=routes.findIndex(x=>x.name===r.name);
+  if(existing>=0)routes[existing]=r;else routes.push(r);
+  localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();
+  $('routeName').value=r.name;
+  $('setupStatus').textContent='⚠ Serveropslag niet bereikbaar. Route lokaal opgeslagen.';
+ }finally{$('saveRoute').disabled=false}
 }
 $('saveRoute').onclick=saveRoute;
 function showView(view){
@@ -313,12 +325,21 @@ function editRoute(i){
  saveSetup();$('routeName').value=r.name;selectLocation(0);$('savedRoutes').value=String(i);$('menu').classList.add('hidden');
  showView('setup');
 }
-function deleteRoute(i){
+async function deleteRoute(i){
  const r=routes[i];if(!r)return;
  if(!confirm('Route “'+r.name+'” verwijderen?'))return;
- routes.splice(i,1);localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));renderRoutes();renderRoutesPage();
- $('savedRoutes').value='';
- $('setupStatus').textContent='Route verwijderd.';
+ try{
+  const api=await authRequest('/routes?name='+encodeURIComponent(r.name),{method:'DELETE'});
+  if(!api.ok)throw new Error();
+  routes=Array.isArray(api.data.routes)?api.data.routes:routes.filter(x=>x!==r);
+  localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+  renderRoutes();renderRoutesPage();
+  $('savedRoutes').value='';
+  $('setupStatus').textContent='Route verwijderd.';
+ }catch{
+  $('setupStatus').className='status warn';
+  $('setupStatus').textContent='Route kon niet van de server worden verwijderd.';
+ }
 }
 $('savedRoutes').onchange=()=>{
  const r=routes[Number($('savedRoutes').value)];if(!r)return;
@@ -378,6 +399,34 @@ function populatePlayerRoutes(selectedRoute){
  routes.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.name+' ('+r.stages.length+')';s.appendChild(o)});
  const idx=routes.findIndex(r=>r===selectedRoute|| (r&&selectedRoute&&r.name===selectedRoute.name));
  if(idx>=0)s.value=String(idx);
+}
+async function fetchServerRoutes(){
+ try{
+  const api=await authRequest('/routes');
+  if(!api.ok||!Array.isArray(api.data.routes))return false;
+  routes=api.data.routes;
+  localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+  renderRoutes();renderRoutesPage();
+  return true;
+ }catch{return false}
+}
+async function syncLocalRoutesToServer(){
+ if(!makerAuthorized||!routes.length)return;
+ try{
+  const server=await authRequest('/routes');
+  if(!server.ok||!Array.isArray(server.data.routes))return;
+  if(server.data.routes.length){
+   routes=server.data.routes;
+   localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+   renderRoutes();renderRoutesPage();
+   return;
+  }
+  for(const r of routes){
+   const saved=await authRequest('/routes',{method:'POST',body:JSON.stringify(r)});
+   if(!saved.ok)break;
+  }
+  await fetchServerRoutes();
+ }catch{}
 }
 function openPlayer(){
  playerMode=true;
@@ -566,13 +615,22 @@ async function authRequest(path,options={}){
  return {ok:r.ok,data};
 }
 async function checkAuth(){
- if(!AUTH_API){makerAuthorized=false;applyAuthUI();openPlayer();return}
+ if(!AUTH_API){makerAuthorized=false;applyAuthUI();await fetchServerRoutes();openPlayer();return}
  try{
   const r=await authRequest('/auth/status');
   makerAuthorized=!!r.data.authenticated;
  }catch{makerAuthorized=false}
  applyAuthUI();
- if(makerAuthorized)showView('setup');else openPlayer();
+ if(makerAuthorized){
+  const hadLocalRoutes=routes.length>0;
+  const loaded=await fetchServerRoutes();
+  if(loaded&&routes.length===0&&hadLocalRoutes)await syncLocalRoutesToServer();
+  else if(!loaded)await syncLocalRoutesToServer();
+  showView('setup');
+ }else{
+  await fetchServerRoutes();
+  openPlayer();
+ }
 }
 function applyAuthUI(){
  $('makerMenu').classList.toggle('authOnly',!makerAuthorized);
@@ -588,8 +646,14 @@ async function doLogin(){
  $('loginButton').disabled=true;
  const r=await authRequest('/auth/login',{method:'POST',body:JSON.stringify({password})});
  $('loginButton').disabled=false;
- if(r.ok&&r.data.authenticated){makerAuthorized=true;applyAuthUI();$('loginPassword').value='';showView('setup');}
- else{$('loginStatus').className='status warn';$('loginStatus').textContent='Inloggen mislukt. Controleer het wachtwoord.'}
+ if(r.ok&&r.data.authenticated){
+  makerAuthorized=true;applyAuthUI();$('loginPassword').value='';
+  const hadLocalRoutes=routes.length>0;
+  const loaded=await fetchServerRoutes();
+  if(loaded&&routes.length===0&&hadLocalRoutes)await syncLocalRoutesToServer();
+  else if(!loaded)await syncLocalRoutesToServer();
+  showView('setup');
+ }else{$('loginStatus').className='status warn';$('loginStatus').textContent='Inloggen mislukt. Controleer het wachtwoord.'}
 }
 $('loginButton').onclick=doLogin;
 $('loginPassword').onkeydown=e=>{if(e.key==='Enter')doLogin()};

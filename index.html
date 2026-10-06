@@ -350,7 +350,7 @@ function smoothHeading(next){if(deviceHeading===null){deviceHeading=next;return}
 function handleAbsolute(e){if(typeof e.alpha!=='number'||!isFinite(e.alpha))return;let h=norm(360-e.alpha),a=screen.orientation?.angle||0;h=norm(h+a);smoothHeading(h);usingAbsolute=true;orientationStarted=true;update()}
 function handleFallback(e){if(usingAbsolute)return;if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading)){smoothHeading(e.webkitCompassHeading);orientationStarted=true;update()}}
 function startOrientation(){if(orientationStarted)return;window.addEventListener('deviceorientationabsolute',handleAbsolute,true);window.addEventListener('deviceorientation',handleFallback,true);if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function')DeviceOrientationEvent.requestPermission(true).catch(()=>{})}
-function setStage(){const s=testRoute?.stages[testIndex];if(!s)return;target=s.target;reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('step').textContent=(testIndex+1)+' / '+testRoute.stages.length;$('clueTitle').textContent=s.title;$('clue').textContent=s.clue}
+function setStage(){const s=testRoute?.stages[testIndex];if(!s)return;target=s.target;reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('clueTitle').textContent=s.title;$('clue').textContent=s.clue}
 function update(){
  if(!current)return;
  $('accuracy').textContent=Math.round(current.accuracy);$('target').textContent=fmtCoord(target);

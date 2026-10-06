@@ -79,6 +79,9 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 </section>
 
 <section id="test" class="test hidden">
+ <div class="card playerRouteSelect playerOnly" style="padding:8px 10px">
+  <div class="topline"><strong>Route</strong><select id="playerRouteSelect" style="flex:1;min-width:0"><option value="">Kies een route…</option></select></div>
+ </div>
  <div class="card playerHero playerOnly">
   <h2 id="playerTitle">GPS Puzzeltocht</h2>
   <p id="playerInstruction">Volg de pijl naar de volgende locatie.</p>
@@ -208,6 +211,7 @@ $('menuButton').onclick=()=>{
 $('homeMenu').onclick=()=>showView('setup');
 $('routesMenu').onclick=()=>{renderRoutesPage();showView('routes')};
 $('playerMenu').onclick=()=>openPlayer();
+$('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=loadPlayerProgress(r);reached=false;target=r.stages[testIndex].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
 $('routesHome').onclick=()=>showView('setup');
 $('infoButton').onclick=()=>{
  const open=$('infoView').classList.contains('hidden');
@@ -262,11 +266,11 @@ $('savedRoutes').onchange=()=>{
 $('testSaved').onclick=()=>{
  const r=routes[Number($('savedRoutes').value)];
  if(!r){$('setupStatus').textContent='Kies eerst een opgeslagen route.';return}
- startTest(r);
+ startTest(r,true);
 };
 $('testCurrent').onclick=()=>{
  if(!routeReady()){$('setupStatus').textContent='Stel eerst minimaal één locatie in.';return}
- startTest(makeRoute($('routeName').value));
+ startTest(makeRoute($('routeName').value),true);
 };
 $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
@@ -301,13 +305,21 @@ function updatePlayerView(){
   $('playerInstruction').textContent='Volg de pijl. Zodra je bij de locatie bent, verschijnt de puzzel.';
  }
 }
+function populatePlayerRoutes(selectedRoute){
+ const s=$('playerRouteSelect');if(!s)return;
+ s.innerHTML='<option value="">Kies een route…</option>';
+ routes.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r.name+' ('+r.stages.length+')';s.appendChild(o)});
+ const idx=routes.findIndex(r=>r===selectedRoute|| (r&&selectedRoute&&r.name===selectedRoute.name));
+ if(idx>=0)s.value=String(idx);
+}
 function openPlayer(){
  playerMode=true;
- if(!testRoute){
+ if(routeReady()) testRoute=makeRoute($('routeName').value);
+ else if(!testRoute){
   const idx=Number($('savedRoutes').value);
   if(routes[idx])testRoute=routes[idx];
-  else if(routes.length)testRoute=routes[0];
  }
+ populatePlayerRoutes(testRoute);
  if(testRoute&&testRoute.stages.length){
   testIndex=loadPlayerProgress(testRoute);
   if(testIndex<0||testIndex>=testRoute.stages.length)testIndex=0;
@@ -333,11 +345,11 @@ $('backSetup').onclick=()=>{
  testRoute=null;playerMode=false;playerProgress=null;showView('setup')
 };
 
-function startTest(r){
- playerMode=false;
+function startTest(r,asPlayer=false){
+ playerMode=!!asPlayer;
  playerProgress=null;
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;
- $('testRouteName').textContent=r.name;$('backSetup').textContent='← Bewerken';showView('test');
+ $('testRouteName').textContent=r.name;$('backSetup').textContent=playerMode?'← Home':'← Bewerken';populatePlayerRoutes(r);showView('test');updatePlayerView();
  setStage();update();
 }
 $('backSetup').onclick=()=>{testRoute=null;playerMode=false;showView('setup')};

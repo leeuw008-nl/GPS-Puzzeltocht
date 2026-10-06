@@ -468,14 +468,29 @@ $('checkAnswer').onclick=()=>{
  if(!testRoute||!reached)return;
  const s=testRoute.stages[testIndex],given=$('answer').value.trim().toUpperCase(),expected=s.answer.toUpperCase(),box=$('answerStatus');
  if(given!==expected){box.className='status warn';box.textContent='Nog niet goed. Probeer opnieuw.';return}
+ box.className='status ok';
  if(testIndex<testRoute.stages.length-1){
+  box.textContent='✓ Goed antwoord! Ga verder naar locatie '+(testIndex+2)+'.';
+  $('testStatus').className='status ok';
+  $('testStatus').textContent='✓ Goed antwoord! Locatie '+(testIndex+1)+' is opgelost.';
   testIndex++;
   if(playerMode)savePlayerProgress();
-  setStage();update();updatePlayerView()
- }
- else{
+  setStage();update();updatePlayerView();
+  if(playerMode){
+   $('answerStatus').className='status ok';
+   $('answerStatus').textContent='✓ Goed antwoord! Ga verder naar locatie '+(testIndex+1)+'.';
+  }
+ }else{
   if(playerMode)clearPlayerProgress();
-  $('testStatus').className='status ok';$('testStatus').textContent=playerMode?'🏁 Route voltooid!':'🏁 Route voltooid!';$('clueTitle').textContent='Route voltooid';$('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn afgerond.';$('puzzle').classList.add('hidden')}
+  $('testStatus').className='status ok';
+  $('testStatus').textContent='🎉 Gefeliciteerd! Je hebt de hele puzzelroute succesvol doorlopen!';
+  $('clueTitle').textContent='🏁 Puzzelroute voltooid!';
+  $('clue').textContent='Alle '+testRoute.stages.length+' locaties zijn opgelost. Gefeliciteerd!';
+  $('playerTitle').textContent='🎉 Gefeliciteerd!';
+  $('playerInstruction').textContent='Je hebt de hele puzzelroute succesvol doorlopen!';
+  $('playerFound').textContent='🏁 Alle locaties zijn voltooid.';
+  $('puzzle').classList.add('hidden');
+ }
 };
 if(typeof L==='undefined'){console.warn('Leaflet kon niet worden geladen.')}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}

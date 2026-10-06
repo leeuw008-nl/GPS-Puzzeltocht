@@ -28,6 +28,8 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 .puzzle{margin-top:7px}.puzzle input{width:100%}.hidden{display:none!important}
 .inlineMapIcon{position:relative;display:inline-grid;vertical-align:-5px;width:20px;height:20px;margin-right:3px}.inlineMapIcon svg{width:20px;height:20px;display:block}.inlineMapGlass{position:absolute;width:8px;height:8px;border:1.7px solid currentColor;border-radius:50%;right:-1px;bottom:-1px;background:#fff}.inlineMapGlass:after{content:"";position:absolute;width:5px;height:1.7px;background:currentColor;right:-4px;bottom:-1px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.infoView{flex:1;min-height:0;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 2px 10px #0001;padding:16px}.infoHero{display:flex;align-items:center;gap:12px;padding:2px 2px 14px;border-bottom:1px solid #e1e8ec}.infoCircle{width:42px;height:42px;border:2px solid #0066cc;border-radius:50%;display:grid;place-items:center;color:#0066cc;font-size:1.65rem;font-weight:500;flex:0 0 auto}.infoHero h2{font-size:1.18rem;margin:0 0 3px}.infoLead{font-size:.82rem;color:#60727e;line-height:1.35}.infoSection{padding:13px 2px;border-bottom:1px solid #e7ecef}.infoSection h3{font-size:.96rem;margin:0 0 6px;color:#173042}.infoSection p{font-size:.84rem;line-height:1.48;margin:5px 0;color:#415661}.infoSection ul{font-size:.84rem;line-height:1.5;color:#415661;margin:6px 0 5px;padding-left:20px}.infoSection li{margin:4px 0}.infoTip{background:#f4f8fa;margin:8px 0 0;padding:11px;border-radius:10px;border:0}.infoFooter{font-size:.68rem;color:#71818a;text-align:center;padding:12px 0 2px}.footer{font-size:.68rem;color:#71818a;text-align:center}
 @media(max-height:700px){.app{padding-top:6px;gap:5px}.card{padding:8px}.slots{margin:4px 0}.slot{padding:5px 1px}.editor{gap:5px}.big{font-size:1.7rem}.arrow{font-size:3.2rem}}
+
+.authOnly{display:none!important}.loginView{flex:1;min-height:0;background:#fff;border-radius:14px;box-shadow:0 2px 10px #0001;padding:18px}.loginBox{max-width:420px;margin:25px auto}.loginBox h2{margin:0 0 6px;color:#0066cc}.loginBox p{font-size:.84rem;color:#60727e;line-height:1.4}.loginBox input{width:100%;margin:8px 0}.loginActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.loginStatus{margin-top:9px}.header.loggedOut .infoBtn,.header.loggedOut .mapBtn{display:none}
 </style>
 </head>
 <body>
@@ -35,6 +37,24 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <div class="header"><h1>GPS Puzzeltocht</h1><div class="headerActions"><button id="infoButton" class="infoBtn" aria-label="Informatie" title="Informatie">ⓘ</button><button id="mapButton" class="mapBtn" aria-label="Kaart" title="Kaart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.8 6.1v14L9 18l6 2 5.2-2.1v-14L15 6 9 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span class="mapGlass"></span></button><button id="menuButton" class="menuBtn" aria-label="Menu">☰</button></div></div>
 <section id="infoView" class="infoView hidden" aria-label="Informatie over GPS Puzzeltocht"><div class="infoHero"><div class="infoCircle">ⓘ</div><div><h2>Over GPS Puzzeltocht</h2><div class="infoLead">Maak en test je eigen GPS-puzzeltocht op je smartphone.</div></div></div><div class="infoSection"><h3>🧭 Zo werkt het</h3><p>Een route bestaat uit maximaal 10 locaties. Bij iedere locatie bepaal je een GPS-punt, een aankomstradius, een vraag en het juiste antwoord.</p><p>Tijdens het testen wordt een locatie pas vrijgegeven wanneer je binnen de ingestelde radius bent. Daarna beantwoord je de vraag om verder te gaan naar de volgende locatie.</p></div><div class="infoSection"><h3>📍 Locaties instellen</h3><p>Je kunt een locatie op twee manieren vastleggen:</p><ul><li><strong>Huidige positie</strong> — gebruik de GPS-positie van je telefoon.</li><li><strong>Coördinaten invoeren</strong> — vul breedtegraad en lengtegraad handmatig in.</li></ul><p>Per locatie kun je de aankomstradius instellen van 5 tot 50 meter.</p></div><div class="infoSection"><h3>❓ Vraag en antwoord</h3><p>Beschrijf bij iedere locatie de vraag of opdracht. Vul daaronder het juiste antwoord in. Tijdens het testen wordt het antwoord gecontroleerd voordat de volgende locatie wordt vrijgegeven.</p></div><div class="infoSection"><h3>💾 Routes</h3><p>Geef je route een naam en kies <strong>Opslaan</strong>. Via het menu ☰ kun je opgeslagen routes later bewerken of verwijderen. Je kunt een opgeslagen route ook direct testen.</p></div><div class="infoSection"><h3><span class="inlineMapIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.8 6.1v14L9 18l6 2 5.2-2.1v-14L15 6 9 4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span class="inlineMapGlass"></span></span> Kaart</h3><p>Met het kaarticoon zie je OpenStreetMap, je huidige positie en de locaties van de geselecteerde route. De locaties worden met genummerde naalden aangegeven.</p><p>Tik op een naald voor de GPS-coördinaten, vraag en antwoord van die locatie.</p></div><div class="infoSection infoTip"><h3>💡 Tip</h3><p>Stel de locaties bij voorkeur buiten op de daadwerkelijke plekken in. Controleer daarna de route met <strong>Test huidige route</strong> voordat je hem gebruikt.</p></div><div class="infoFooter">GPS Puzzeltocht · informatie</div></section>
 <div id="menu" class="card menu hidden">
+ <div id="loginMenu" class="menuNav"><button id="loginMenuButton">🔐 Routemaker inloggen</button></div>
+ <div id="makerMenu" class="menuNav authOnly">
+  <button id="homeMenu">🏠 Home</button>
+  <button id="routesMenu">🗂️ Routes</button>
+  <button id="playerMenu">▶️ Gebruikersscherm</button>
+  <button id="logoutButton" class="secondary">🚪 Uitloggen</button>
+ </div>
+</div>
+<div id="loginView" class="loginView hidden" aria-label="Routemaker inloggen">
+ <div class="loginBox">
+  <h2>🔐 Routemaker inloggen</h2>
+  <p>Log in om routes te maken, te bewerken en te testen. Zonder inloggen is alleen het gebruikersscherm beschikbaar.</p>
+  <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord">
+  <div class="loginActions"><button id="loginButton">Inloggen</button><button id="loginCancel" class="secondary">← Gebruikersscherm</button></div>
+  <div id="loginStatus" class="status hidden"></div>
+ </div>
+</div>
+<div id="menuOldRemoved" class="hidden"></div>
  <div class="menuNav">
   <button id="homeMenu">🏠 Home</button>
   <button id="routesMenu">🗂️ Routes</button>
@@ -122,6 +142,8 @@ const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
 let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
 let playerProgress=null;
+let makerAuthorized=false;
+const AUTH_API='__AUTH_API_URL__';
 
 function load(){
  try{setupLocations=JSON.parse(localStorage.getItem('gpsPuzzleLocations')||'[]')}catch{setupLocations=[]}
@@ -203,17 +225,19 @@ function showView(view){
  $('mapView').classList.toggle('hidden',view!=='map');
  $('infoView').classList.toggle('hidden',view!=='info');
  $('menu').classList.toggle('hidden',view!=='menu');
+ $('loginView').classList.toggle('hidden',view!=='login');
+ if(!makerAuthorized && ['setup','routes','map','info'].includes(view)) view='test';
 }
 $('menuButton').onclick=()=>{
  const open=$('menu').classList.contains('hidden');
- if(open){showView('menu')}else{showView('setup')}
+ if(open){showView('menu')}else{showView(makerAuthorized?'setup':'test')}
 };
-$('homeMenu').onclick=()=>showView('setup');
-$('routesMenu').onclick=()=>{renderRoutesPage();showView('routes')};
+$('homeMenu').onclick=()=>{if(makerAuthorized)showView('setup')};
+$('routesMenu').onclick=()=>{if(makerAuthorized){renderRoutesPage();showView('routes')}};
 $('playerMenu').onclick=()=>openPlayer();
 $('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=loadPlayerProgress(r);if(testIndex<0||testIndex>=r.stages.length)testIndex=0;playerProgress={route:r.name,index:testIndex};reached=false;target=r.stages[testIndex].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
-$('routesHome').onclick=()=>showView('setup');
-$('infoButton').onclick=()=>{
+$('routesHome').onclick=()=>{if(makerAuthorized)showView('setup')};
+$('infoButton').onclick=()=>{if(!makerAuthorized)return;
  const open=$('infoView').classList.contains('hidden');
  if(open){
   infoReturn=$('test').classList.contains('hidden')?($('mapView').classList.contains('hidden')?'setup':'map'):'test';
@@ -463,7 +487,7 @@ function showMap(){
 function hideMap(){
  showView(testRoute?'test':'setup');
 }
-$('mapButton').onclick=()=>{if($('mapView').classList.contains('hidden'))showMap();else hideMap()};
+$('mapButton').onclick=()=>{if(!makerAuthorized)return;if($('mapView').classList.contains('hidden'))showMap();else hideMap()};
 window.addEventListener('resize',()=>{if(!$('mapView').classList.contains('hidden')){positionMapView();if(map)map.invalidateSize(true)}});
 if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 startOrientation();
@@ -495,9 +519,48 @@ $('checkAnswer').onclick=()=>{
   $('puzzle').classList.add('hidden');
  }
 };
+
+async function authRequest(path,options={}){
+ const r=await fetch(AUTH_API+path,{...options,credentials:'include',headers:{'Content-Type':'application/json',...(options.headers||{})}});
+ let data={};try{data=await r.json()}catch{}
+ return {ok:r.ok,data};
+}
+async function checkAuth(){
+ if(AUTH_API==='__AUTH_API_URL__'){makerAuthorized=false;applyAuthUI();openPlayer();return}
+ try{
+  const r=await authRequest('/auth/status');
+  makerAuthorized=!!r.data.authenticated;
+ }catch{makerAuthorized=false}
+ applyAuthUI();
+ if(makerAuthorized)showView('setup');else openPlayer();
+}
+function applyAuthUI(){
+ $('makerMenu').classList.toggle('authOnly',!makerAuthorized);
+ $('loginMenu').classList.toggle('authOnly',makerAuthorized);
+ document.querySelector('.header').classList.toggle('loggedOut',!makerAuthorized);
+}
+$('loginMenuButton').onclick=()=>{$('loginPassword').value='';$('loginStatus').className='status hidden';showView('login');setTimeout(()=>$('loginPassword').focus(),50)};
+$('loginCancel').onclick=()=>openPlayer();
+async function doLogin(){
+ const password=$('loginPassword').value;
+ if(!password){$('loginStatus').className='status warn';$('loginStatus').textContent='Vul het wachtwoord in.';return}
+ $('loginButton').disabled=true;
+ const r=await authRequest('/auth/login',{method:'POST',body:JSON.stringify({password})});
+ $('loginButton').disabled=false;
+ if(r.ok&&r.data.authenticated){makerAuthorized=true;applyAuthUI();$('loginPassword').value='';showView('setup');}
+ else{$('loginStatus').className='status warn';$('loginStatus').textContent='Inloggen mislukt. Controleer het wachtwoord.'}
+}
+$('loginButton').onclick=doLogin;
+$('loginPassword').onkeydown=e=>{if(e.key==='Enter')doLogin()};
+$('logoutButton').onclick=async()=>{
+ try{await authRequest('/auth/logout',{method:'POST'})}catch{}
+ makerAuthorized=false;playerMode=false;testRoute=null;applyAuthUI();openPlayer();
+};
+
 if(typeof L==='undefined'){console.warn('Leaflet kon niet worden geladen.')}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}))}
 load();
+checkAuth();
 </script>
 </body>
 </html>

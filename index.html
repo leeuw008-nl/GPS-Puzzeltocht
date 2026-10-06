@@ -386,9 +386,14 @@ function update(){
 function onPos(pos){current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};update();updateMapLocation()}
 function onErr(e){$('testStatus').textContent='GPS-fout: '+e.message;$('testStatus').className='status warn'}
 function initMap(){
- if(map)return;
- map=L.map('map',{zoomControl:true,maxZoom:19}).setView([52.5200,6.4200],18);
+ if(map)return true;
+ if(typeof L==='undefined')return false;
+ const el=$('map');
+ if(!el)return false;
+ el.style.width='100%';el.style.height='100%';
+ map=L.map(el,{zoomControl:true,maxZoom:19}).setView([52.5200,6.4200],18);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap-bijdragers'}).addTo(map);
+ return true;
 }
 function updateMapLocation(){
  if(!map||!current)return;
@@ -416,9 +421,19 @@ function updateMapRoute(){
 }
 function showMap(){
  showView('map');
- initMap();
- updateMapRoute();
- setTimeout(()=>{map.invalidateSize();if(current)map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));updateMapLocation()},50);
+ requestAnimationFrame(()=>{
+  if(!initMap()){
+   $('mapRouteName').textContent='Kaart wordt geladen…';
+   setTimeout(()=>showMap(),300);
+   return;
+  }
+  updateMapRoute();
+  setTimeout(()=>{
+   map.invalidateSize(true);
+   if(current)map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));
+   updateMapLocation();
+  },80);
+ });
 }
 function hideMap(){
  showView(testRoute?'test':'setup');

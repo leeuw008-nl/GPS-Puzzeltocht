@@ -299,9 +299,9 @@ function updatePlayerView(){
  const total=testRoute?.stages.length||0;
  $('playerProgressFill').style.width=total?((testIndex/total)*100)+'%':'0%';
  $('playerLabel').textContent=playerMode?'Deelnemersscherm':'';
- $('playerNext').textContent=total?'Locatie '+(testIndex+1)+' van '+total:'';
+ $('playerNext').textContent='';
  if(testRoute){
-  $('playerTitle').textContent='Ga naar locatie '+(testIndex+1);
+  $('playerTitle').textContent='Ga naar locatie '+(testIndex+1)+' (van '+total+')';
   $('playerInstruction').textContent='Volg de pijl. Zodra je bij de locatie bent, verschijnt de puzzel.';
  }
 }
@@ -388,7 +388,7 @@ function update(){
   if(!reached){
    $('puzzle').classList.add('hidden');
    if(playerMode){
-    $('playerTitle').textContent='Ga naar locatie '+(testIndex+1);
+    $('playerTitle').textContent='Ga naar locatie '+(testIndex+1)+' (van '+testRoute.stages.length+')';
     $('playerInstruction').textContent='Volg de pijl. Zodra je bij de locatie bent, verschijnt de puzzel.';
    }
   }

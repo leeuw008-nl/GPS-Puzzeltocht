@@ -211,7 +211,7 @@ $('menuButton').onclick=()=>{
 $('homeMenu').onclick=()=>showView('setup');
 $('routesMenu').onclick=()=>{renderRoutesPage();showView('routes')};
 $('playerMenu').onclick=()=>openPlayer();
-$('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=0;clearPlayerProgress();reached=false;target=r.stages[0].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
+$('playerRouteSelect').onchange=()=>{const r=routes[Number($('playerRouteSelect').value)];if(!r)return;testRoute=r;testIndex=loadPlayerProgress(r);if(testIndex<0||testIndex>=r.stages.length)testIndex=0;playerProgress={route:r.name,index:testIndex};reached=false;target=r.stages[testIndex].target;$('testRouteName').textContent=r.name;setStage();update();updatePlayerView();};
 $('routesHome').onclick=()=>showView('setup');
 $('infoButton').onclick=()=>{
  const open=$('infoView').classList.contains('hidden');
@@ -276,7 +276,10 @@ $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
 function playerProgressKey(route){
- return 'gpsPuzzlePlayerProgress:'+String(route?.name||'').trim();
+ const identity=(route?.stages||[]).map(s=>[
+  s.target?.lat,s.target?.lon,s.radius,s.question,s.answer
+ ]).map(v=>JSON.stringify(v)).join('|');
+ return 'gpsPuzzlePlayerProgress:'+String(route?.name||'').trim()+':'+identity;
 }
 function loadPlayerProgress(route){
  try{

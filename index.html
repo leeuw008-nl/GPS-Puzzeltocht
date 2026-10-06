@@ -213,7 +213,7 @@ function selectLocation(i){
  $('selectedCoord').textContent=x?fmtCoord(x):'nog niet ingesteld';$('latitudeInput').value=x?String(x.lat):'';$('longitudeInput').value=x?String(x.lon):'';
  $('radius').value=x?.radius||15;$('radiusValue').textContent=x?.radius||15;
  $('question').value=setupQuestions[i]||'';$('answerSetup').value=setupAnswers[i]||'';
- $('setupStatus').textContent=x?'✓ Locatie '+(i+1)+' ingesteld. Pas evt. aankomstradius aan.':'Kies deze locatie en druk op “Stel deze locatie in”.';
+ $('setupStatus').textContent=x?'✓ Locatie '+(i+1)+' ingesteld. Pas evt. aankomstradius aan.':'';
  renderSlots();
 }
 $('radius').oninput=()=>{const v=Number($('radius').value);$('radiusValue').textContent=v;if(setupLocations[selected]){setupLocations[selected].radius=v;saveSetup()}};

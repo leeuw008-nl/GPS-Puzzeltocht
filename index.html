@@ -12,7 +12,7 @@
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
 .app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden}.app>.header{position:relative;display:flex;flex:0 0 auto;align-self:stretch;width:100%;min-width:0}.app>section,.app>.menu{position:relative;align-self:stretch;flex:1 1 0;width:100%;min-width:0;min-height:0}.mapView{position:fixed!important;display:block!important;z-index:10;flex:none!important;padding:0!important;overflow:hidden!important}.map{position:absolute;left:0;right:0;top:0;bottom:0;width:100%;height:100%;min-width:0;min-height:0;border-radius:14px;overflow:hidden}.mapRouteName{position:absolute;right:14px;top:14px;z-index:1000;max-width:70%;padding:7px 10px;background:#fff;border-radius:9px;box-shadow:0 2px 8px #0002;font-weight:750;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.routePin{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#0066cc;color:#fff;border:2px solid #fff;box-shadow:0 2px 5px #0005;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem}.routePin span{transform:rotate(45deg)}.infoBtn,.mapBtn{position:relative;background:transparent;color:#173042;width:32px;height:32px;padding:2px;line-height:1;display:grid;place-items:center}.infoBtn{font-size:1.65rem;font-weight:500}.mapBtn svg{width:24px;height:24px;display:block}.mapGlass{position:absolute;width:11px;height:11px;border:2px solid currentColor;border-radius:50%;right:1px;bottom:1px;background:#f4f7f9}.mapGlass:after{content:"";position:absolute;width:6px;height:2px;background:currentColor;right:-5px;bottom:-2px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.headerActions{display:flex;align-items:center;gap:3px}
-h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between;background:#0066cc;color:#fff;border-radius:12px;padding:9px 10px 9px 14px;box-shadow:0 3px 10px #0066cc35}.header h1{color:#fff;font-size:1.2rem;letter-spacing:.01em}.header .infoBtn,.header .mapBtn,.header .menuBtn{color:#fff}.header .mapGlass{background:#0066cc}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}.menuItemActions{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}.menuNav{display:grid;gap:8px}.menuNav button{text-align:left;padding:13px 12px;font-size:1rem}.routesPageList{display:grid;gap:7px}
+h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between;background:#0066cc;color:#fff;border-radius:12px;padding:9px 10px 9px 14px;box-shadow:0 3px 10px #0066cc35}.header h1{color:#fff;font-size:1.2rem;letter-spacing:.01em}.header .infoBtn,.header .mapBtn,.header .menuBtn{color:#fff}.header .mapGlass{background:#0066cc}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}.menuItemActions{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}.menuNav{display:grid;gap:8px}.menuNav button{text-align:left;padding:13px 12px;font-size:1rem}.routesPageList{display:grid;gap:7px}.historyList{display:grid;gap:7px}.historyItem{padding:10px;border:1px solid #dce5ea;border-radius:10px;background:#f9fbfc}.historyItem strong{display:block;margin-bottom:3px}.historyMeta{font-size:.76rem;color:#60727e}.historyActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#0066cc;color:#fff}button.active{background:#0066cc}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
 input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;padding:8px;background:#fff}textarea{width:100%;resize:none}input[type=range]{width:100%;padding:0}
@@ -44,7 +44,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <div class="infoFooter">GPS Puzzeltocht · informatie</div>
 </div></section>
 <div id="menu" class="card menu hidden">
- <div id="loginMenu" class="menuNav"><button id="homeUserMenu">🏠 Home</button><button id="loginMenuButton">🔐 Routemaker inloggen</button></div>
+ <div id="loginMenu" class="menuNav"><button id="homeUserMenu">🏠 Home</button><button id="historyMenu">📜 Mijn historie</button><button id="loginMenuButton">🔐 Routemaker inloggen</button></div>
  <div id="makerMenu" class="menuNav authOnly">
   <button id="homeMenu">🏠 Home</button>
   <button id="routesMenu">🗂️ Routes</button>
@@ -52,6 +52,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
   <button id="logoutButton" class="secondary">🚪 Uitloggen</button>
  </div>
 </div>
+<section id="historyView" class="infoView hidden" aria-label="Mijn historie"><div class="infoHero"><div class="infoCircle">📜</div><div><h2>Mijn historie</h2><div class="infoLead">Hier vind je de puzzelroutes die op deze smartphone succesvol zijn voltooid.</div></div></div><div class="infoSection"><div id="historyList" class="historyList"></div><div class="historyActions"><button id="exportHistory">📤 Exporteren</button><button id="importHistoryButton" class="secondary">📥 Importeren</button></div><input id="importHistoryFile" type="file" accept="application/json,.json" class="hidden"><div id="historyStatus" class="status hidden" style="margin-top:8px"></div></div></section>
 <div id="loginView" class="loginView hidden" aria-label="Routemaker inloggen">
  <div class="loginBox">
   <h2>🔐 Routemaker inloggen</h2>
@@ -277,6 +278,7 @@ function showView(view){
  $('mapView').classList.toggle('hidden',view!=='map');
  $('infoView').classList.toggle('hidden',view!=='info');
  $('menu').classList.toggle('hidden',view!=='menu');
+ $('historyView').classList.toggle('hidden',view!=='history');
  $('loginView').classList.toggle('hidden',view!=='login');
 }
 $('menuButton').onclick=()=>{
@@ -360,6 +362,57 @@ $('testCurrent').onclick=()=>{
 $('newRoute').onclick=()=>{
  testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
+const PLAYER_HISTORY_KEY='gpsPuzzlePlayerHistory';
+function loadPlayerHistory(){
+ try{const h=JSON.parse(localStorage.getItem(PLAYER_HISTORY_KEY)||'[]');return Array.isArray(h)?h:[]}catch{return[]}
+}
+function savePlayerHistory(history){localStorage.setItem(PLAYER_HISTORY_KEY,JSON.stringify(history))}
+function renderPlayerHistory(){
+ const box=$('historyList');if(!box)return;
+ const history=loadPlayerHistory();box.innerHTML='';
+ if(!history.length){box.innerHTML='<div class="status">Nog geen voltooide routes op deze smartphone.</div>';return}
+ history.slice().reverse().forEach(item=>{
+  const row=document.createElement('div');row.className='historyItem';
+  const name=document.createElement('strong');name.textContent='🏆 '+item.routeName;
+  const meta=document.createElement('div');meta.className='historyMeta';
+  const d=new Date(item.completedAt);meta.textContent='Voltooid: '+(isNaN(d)?item.completedAt:d.toLocaleString('nl-NL'))+' • '+item.locations+' locaties';
+  row.append(name,meta);box.appendChild(row);
+ });
+}
+function recordCompletedRoute(route){
+ if(!route||!route.name)return;
+ const history=loadPlayerHistory();
+ history.push({routeName:String(route.name),completedAt:new Date().toISOString(),locations:route.stages?.length||0});
+ savePlayerHistory(history);renderPlayerHistory();
+}
+function exportPlayerHistory(){
+ const data={format:'gps-puzzeltocht-history',version:1,exportedAt:new Date().toISOString(),history:loadPlayerHistory()};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='gps-puzzeltocht-historie.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ $('historyStatus').className='status ok';$('historyStatus').textContent='Historie geëxporteerd.';
+}
+function importPlayerHistory(file){
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const data=JSON.parse(reader.result),incoming=Array.isArray(data)?data:data.history;
+   if(!Array.isArray(incoming))throw new Error();
+   const current=loadPlayerHistory();
+   const merged=[...current];
+   incoming.forEach(item=>{
+    if(!item||!item.routeName||!item.completedAt)return;
+    const exists=merged.some(x=>x.routeName===item.routeName&&x.completedAt===item.completedAt);
+    if(!exists)merged.push({routeName:String(item.routeName),completedAt:String(item.completedAt),locations:Number(item.locations)||0});
+   });
+   merged.sort((a,b)=>String(a.completedAt).localeCompare(String(b.completedAt)));
+   savePlayerHistory(merged);renderPlayerHistory();
+   $('historyStatus').className='status ok';$('historyStatus').textContent='Historie geïmporteerd.';
+  }catch{$('historyStatus').className='status warn';$('historyStatus').textContent='Dit bestand bevat geen geldige GPS-Puzzeltocht-historie.'}
+  $('importHistoryFile').value='';
+ };
+ reader.readAsText(file);
+}
 function playerProgressKey(route){
  const identity=(route?.stages||[]).map(s=>[
   s.target?.lat,s.target?.lon,s.radius,s.question,s.answer
@@ -597,7 +650,7 @@ $('checkAnswer').onclick=()=>{
    $('answerStatus').textContent='✓ Goed antwoord! Ga verder naar locatie '+(testIndex+1)+'.';
   }
  }else{
-  if(playerMode)clearPlayerProgress();
+  if(playerMode){recordCompletedRoute(testRoute);clearPlayerProgress();}
   $('testStatus').className='status ok';
   $('testStatus').textContent='🎉 Gefeliciteerd! Je hebt de hele puzzelroute succesvol doorlopen!';
   $('clueTitle').textContent='🏁 Puzzelroute voltooid!';
@@ -638,6 +691,10 @@ function applyAuthUI(){
  document.querySelector('.header').classList.toggle('loggedOut',!makerAuthorized);
 }
 $('homeUserMenu').onclick=()=>openPlayer();
+$('historyMenu').onclick=()=>{renderPlayerHistory();showView('history')};
+$('exportHistory').onclick=exportPlayerHistory;
+$('importHistoryButton').onclick=()=>$('importHistoryFile').click();
+$('importHistoryFile').onchange=e=>{const f=e.target.files?.[0];if(f)importPlayerHistory(f)};
 $('loginMenuButton').onclick=()=>{$('loginPassword').value='';$('loginStatus').className='status hidden';showView('login');setTimeout(()=>$('loginPassword').focus(),50)};
 $('loginCancel').onclick=()=>openPlayer();
 async function doLogin(){

@@ -612,23 +612,45 @@ function mapStageData(i){
  const r=getMapRoute();
  return r?.stages?.[i]||null;
 }
-function saveMapStage(i,lat,lon,question,answer){
+async function saveMapStage(i,lat,lon,question,answer){
  const s=mapStageData(i);if(!s)return;
- s.target={lat,lon};s.question=question; s.answer=answer;
+ const newTarget={lat:Number(lat),lon:Number(lon)};
+ s.target=newTarget;s.question=question;s.answer=answer;
  if(testRoute){
-  testRoute.stages[i].target={lat,lon};
+  testRoute.stages[i].target={...newTarget};
   testRoute.stages[i].question=question;
   testRoute.stages[i].answer=answer;
  }
  if(setupLocations.length){
-  setupLocations[i]={lat,lon,radius:setupLocations[i]?.radius||s.radius||15};
+  setupLocations[i]={lat:newTarget.lat,lon:newTarget.lon,radius:setupLocations[i]?.radius||s.radius||15};
   setupQuestions[i]=question;
   setupAnswers[i]=answer;
   saveSetup();
-  selectLocation(selected);
+  selectLocation(i);
+ }
+ // Ook de opgeslagen route zelf bijwerken. Alleen de tijdelijke kaartdata
+ // aanpassen was onvoldoende: daardoor kwam na opnieuw openen de oude pin terug.
+ const routeName=$('routeName').value.trim();
+ const routeIndex=routes.findIndex(r=>r&&r.name===routeName);
+ if(routeIndex>=0){
+  const saved=routes[routeIndex];
+  if(saved.stages?.[i]){
+   saved.stages[i]={...saved.stages[i],target:{...newTarget},question,answer};
+  }
+  routes[routeIndex]=saved;
+  localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+  renderRoutes();renderRoutesPage();
+  try{
+   const api=await authRequest('/routes',{method:'POST',body:JSON.stringify(saved)});
+   if(api.ok&&Array.isArray(api.data.routes)){
+    routes=api.data.routes;
+    localStorage.setItem('gpsPuzzleRoutes',JSON.stringify(routes));
+    renderRoutes();renderRoutesPage();
+   }
+  }catch{}
  }
  $('setupStatus').className='status ok';
- $('setupStatus').textContent='✓ Locatie '+(i+1)+' bijgewerkt op de kaart.';
+ $('setupStatus').textContent='✓ Locatie '+(i+1)+' bijgewerkt en opgeslagen op de kaart.';
  const marker=mapRouteMarkers[i];
  if(marker?.getPopup()){
   const popup='<div class="mapEditPopup"><strong>Locatie '+(i+1)+'</strong>'+
@@ -637,6 +659,13 @@ function saveMapStage(i,lat,lon,question,answer){
    '<label for="mapAnswer'+i+'">Antwoord</label><input id="mapAnswer'+i+'" value="'+escapeHtml(answer||'')+'">'+
    '<button type="button" class="mapSave" data-map-save="'+i+'">Opslaan</button></div>';
   marker.getPopup().setContent(popup);
+ }
+ // Na opslaan terug naar de normale pin: het verlengstokje hoort alleen
+ // zichtbaar te zijn tijdens het nauwkeurig verplaatsen.
+ if(marker){
+  marker.setIcon(L.divIcon({className:'',html:'<div class="routePin"><span>'+(i+1)+'</span></div>',iconSize:[30,30],iconAnchor:[8,28]}));
+  marker.setZIndexOffset(100+i);
+  marker.closePopup();
  }
 }
 function updateMapRoute(){

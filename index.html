@@ -657,6 +657,7 @@ async function saveMapStage(i,lat,lon,question,answer){
    '<div class="mapDragHint">Tik op de pin en sleep daarna aan het ronde handvat onderaan het stokje om nauwkeurig te plaatsen.</div>'+
    '<label for="mapQuestion'+i+'">Vraag</label><textarea id="mapQuestion'+i+'">'+escapeHtml(question||'')+'</textarea>'+
    '<label for="mapAnswer'+i+'">Antwoord</label><input id="mapAnswer'+i+'" value="'+escapeHtml(answer||'')+'">'+
+   '<button type="button" class="secondary mapMove" data-map-move="'+i+'">📍 Pin verplaatsen</button>'+
    '<button type="button" class="mapSave" data-map-save="'+i+'">Opslaan</button></div>';
   marker.getPopup().setContent(popup);
  }

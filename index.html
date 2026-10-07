@@ -219,8 +219,29 @@ function selectLocation(i){
 $('radius').oninput=()=>{const v=Number($('radius').value);$('radiusValue').textContent=v;if(setupLocations[selected]){setupLocations[selected].radius=v;saveSetup()}};
 $('question').oninput=()=>{setupQuestions[selected]=$('question').value;saveSetup()};
 $('answerSetup').oninput=()=>{setupAnswers[selected]=$('answerSetup').value;saveSetup()};
+function requestCurrentPosition(){
+ if(!('geolocation' in navigator)){
+  $('setupStatus').className='status warn';
+  $('setupStatus').textContent='GPS/locatie wordt niet ondersteund door deze browser.';
+  return
+ }
+ $('setupStatus').className='status';
+ $('setupStatus').textContent='GPS-positie wordt opgehaald…';
+ navigator.geolocation.getCurrentPosition(pos=>{
+  onPos(pos);
+  $('latitudeInput').value=String(pos.coords.latitude);
+  $('longitudeInput').value=String(pos.coords.longitude);
+  $('selectedCoord').textContent=fmtCoord(current);
+  $('setupStatus').className='status ok';
+  $('setupStatus').textContent='GPS-positie gevonden: '+fmtCoord(current)+' (nauwkeurigheid ±'+Math.round(pos.coords.accuracy)+' m).';
+ },err=>{
+  $('setupStatus').className='status warn';
+  const msg=err.code===1?'Locatietoegang geweigerd. Geef deze website toestemming voor locatie.':err.code===2?'GPS-positie kon niet worden bepaald. Controleer of locatie/GPS aanstaat.':'GPS-positie ophalen duurt te lang. Probeer opnieuw.';
+  $('setupStatus').textContent=msg;
+ },{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+}
 function setLocation(){
- if(!current){$('setupStatus').textContent='Wacht eerst tot GPS een positie heeft gevonden.';return}
+ if(!current){requestCurrentPosition();return}
  const radius=Number($('radius').value)||15;
  setupLocations[selected]={lat:current.lat,lon:current.lon,radius};
  saveSetup();selectLocation(selected);
@@ -237,7 +258,7 @@ function setManualCoordinates(){
  saveSetup();selectLocation(selected);
  $('setupStatus').textContent='✓ Locatie '+(selected+1)+' handmatig ingesteld op '+fmtCoord({lat,lon})+' met '+radius+' m radius.';
 }
-$('setLocation').onclick=setLocation;
+$('setLocation').onclick=()=>{if(!current)requestCurrentPosition();else setLocation()};
 $('latitudeInput').onchange=setManualCoordinates;
 $('longitudeInput').onchange=setManualCoordinates;
 

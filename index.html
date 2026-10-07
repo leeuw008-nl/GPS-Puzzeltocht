@@ -708,6 +708,10 @@ function updateMapRoute(){
     marker.closePopup();
    };
   });
+  marker.on('popupclose',()=>{
+   marker.setIcon(normalIcon);
+   marker.setZIndexOffset(100+i);
+  });
   mapRouteMarkers.push(marker);
  });
 }

@@ -11,7 +11,7 @@
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#173042;background:#f4f7f9}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}body{display:flex;justify-content:center}
-.app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden}.app>.header{position:relative;display:flex;flex:0 0 auto;align-self:stretch;width:100%;min-width:0}.app>section,.app>.menu{position:relative;align-self:stretch;flex:1 1 0;width:100%;min-width:0;min-height:0}.mapView{position:fixed!important;display:block!important;z-index:10;flex:none!important;padding:0!important;overflow:hidden!important}.map{position:absolute;left:0;right:0;top:0;bottom:0;width:100%;height:100%;min-width:0;min-height:0;border-radius:14px;overflow:hidden}.mapZoomLevel{padding:5px 8px;background:#fff;border-radius:6px;box-shadow:0 1px 5px #0003;font-weight:750;font-size:.78rem;line-height:1.2;white-space:nowrap;pointer-events:none}.mapRouteName{position:absolute;right:14px;top:14px;z-index:1000;max-width:70%;padding:7px 10px;background:#fff;border-radius:9px;box-shadow:0 2px 8px #0002;font-weight:750;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mapAddPin{position:absolute;left:14px;bottom:14px;top:auto;z-index:1000;padding:8px 12px;border:0;border-radius:9px;background:#0066cc;color:#fff;box-shadow:0 2px 8px #0003;font-weight:750;font-size:.88rem;pointer-events:auto}.mapAddPin.active{background:#0066cc;color:#fff}.mapAddPopup{min-width:255px}.mapAddPopup label{display:block;font-weight:700;font-size:.78rem;margin:7px 0 3px}.mapAddPopup input,.mapAddPopup textarea{width:100%;font-size:.82rem;padding:6px}.mapAddPopup textarea{min-height:54px}.mapAddPopup .mapRadiusValue{text-align:center;font-weight:700;margin-top:3px}.mapAddPopup .mapAddSave{width:100%;margin-top:10px}.mapAddPopup .mapAddCancel{width:100%;margin-top:7px}.mapEditPopup{min-width:250px}.mapSaveBar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:1000;background:#fff;padding:7px 10px;border-radius:10px;box-shadow:0 2px 10px #0004}.mapSaveBar .mapSave{min-width:120px}.mapEditPopup label{display:block;font-weight:700;font-size:.78rem;margin:7px 0 3px}.mapEditPopup input,.mapEditPopup textarea{width:100%;font-size:.82rem;padding:6px}.mapEditPopup textarea{min-height:54px}.mapEditPopup .mapMove{display:block!important;width:72%;margin:12px auto!important;text-align:center}.mapEditPopup .mapSave{margin-top:0;width:100%}.mapDragHint{font-size:.72rem;color:#60727e;margin-top:5px}.routePin{position:relative;width:30px;height:38px;color:#fff;display:flex;align-items:flex-start;justify-content:center;font-weight:800;font-size:.82rem}.routePin:before{content:"";position:absolute;left:2px;top:0;width:26px;height:26px;border-radius:50%;background:#0066cc;border:2px solid #fff;box-shadow:0 2px 5px #0005}.routePin:after{content:"";position:absolute;left:8px;top:20px;width:14px;height:14px;background:#0066cc;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);z-index:-1}.routePin span{position:relative;z-index:2;margin-top:5px}.routePinPrecision{position:relative;width:34px;height:82px}.routePinPrecision .pinStem{position:absolute;left:15px;top:30px;width:4px;height:30px;background:#0066cc;border-radius:4px;box-shadow:0 1px 3px #0004}.routePinPrecision .pinHandle{position:absolute;left:4px;bottom:0;width:26px;height:26px;border-radius:50%;background:#fff;border:4px solid #0066cc;box-shadow:0 2px 7px #0005;display:grid;place-items:center;color:#0066cc;font-weight:900;font-size:.72rem}.routePinPrecision .pinBase{position:absolute;left:2px;top:0;width:30px;height:38px}.routePinPrecision .pinBase:before{content:"";position:absolute;left:2px;top:0;width:26px;height:26px;border-radius:50%;background:#0066cc;border:2px solid #fff;box-shadow:0 2px 5px #0005}.routePinPrecision .pinBase:after{content:"";position:absolute;left:8px;top:20px;width:14px;height:14px;background:#0066cc;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);z-index:-1}.routePinPrecision .pinBase span{position:absolute;left:0;top:5px;width:30px;text-align:center;z-index:2}.infoBtn,.mapBtn{position:relative;background:transparent;color:#173042;width:32px;height:32px;padding:2px;line-height:1;display:grid;place-items:center}.infoBtn{font-size:1.65rem;font-weight:500}.mapBtn svg{width:24px;height:24px;display:block}.mapGlass{position:absolute;width:11px;height:11px;border:2px solid currentColor;border-radius:50%;right:1px;bottom:1px;background:#f4f7f9}.mapGlass:after{content:"";position:absolute;width:6px;height:2px;background:currentColor;right:-5px;bottom:-2px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.headerActions{display:flex;align-items:center;gap:3px}
+.app{width:100%;max-width:620px;height:100svh;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden}.app>.header{position:relative;display:flex;flex:0 0 auto;align-self:stretch;width:100%;min-width:0}.app>section,.app>.menu{position:relative;align-self:stretch;flex:1 1 0;width:100%;min-width:0;min-height:0}.mapView{position:fixed!important;display:block!important;z-index:10;flex:none!important;padding:0!important;overflow:hidden!important}.map{position:absolute;left:0;right:0;top:0;bottom:0;width:100%;height:100%;min-width:0;min-height:0;border-radius:14px;overflow:hidden}.mapZoomLevel{padding:5px 8px;background:#fff;border-radius:6px;box-shadow:0 1px 5px #0003;font-weight:750;font-size:.78rem;line-height:1.2;white-space:nowrap;pointer-events:none}.mapRouteSelect{position:absolute;right:14px;top:14px;z-index:1000;max-width:70%;padding:7px 30px 7px 10px;background:#fff;border:0;border-radius:9px;box-shadow:0 2px 8px #0002;font-weight:750;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mapAddPin{position:absolute;left:14px;bottom:14px;top:auto;z-index:1000;padding:8px 12px;border:0;border-radius:9px;background:#0066cc;color:#fff;box-shadow:0 2px 8px #0003;font-weight:750;font-size:.88rem;pointer-events:auto}.mapAddPin.active{background:#0066cc;color:#fff}.mapAddPopup{min-width:255px}.mapAddPopup label{display:block;font-weight:700;font-size:.78rem;margin:7px 0 3px}.mapAddPopup input,.mapAddPopup textarea{width:100%;font-size:.82rem;padding:6px}.mapAddPopup textarea{min-height:54px}.mapAddPopup .mapRadiusValue{text-align:center;font-weight:700;margin-top:3px}.mapAddPopup .mapAddSave{width:100%;margin-top:10px}.mapAddPopup .mapAddCancel{width:100%;margin-top:7px}.mapEditPopup{min-width:250px}.mapSaveBar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:1000;background:#fff;padding:7px 10px;border-radius:10px;box-shadow:0 2px 10px #0004}.mapSaveBar .mapSave{min-width:120px}.mapEditPopup label{display:block;font-weight:700;font-size:.78rem;margin:7px 0 3px}.mapEditPopup input,.mapEditPopup textarea{width:100%;font-size:.82rem;padding:6px}.mapEditPopup textarea{min-height:54px}.mapEditPopup .mapMove{display:block!important;width:72%;margin:12px auto!important;text-align:center}.mapEditPopup .mapSave{margin-top:0;width:100%}.mapDragHint{font-size:.72rem;color:#60727e;margin-top:5px}.routePin{position:relative;width:30px;height:38px;color:#fff;display:flex;align-items:flex-start;justify-content:center;font-weight:800;font-size:.82rem}.routePin:before{content:"";position:absolute;left:2px;top:0;width:26px;height:26px;border-radius:50%;background:#0066cc;border:2px solid #fff;box-shadow:0 2px 5px #0005}.routePin:after{content:"";position:absolute;left:8px;top:20px;width:14px;height:14px;background:#0066cc;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);z-index:-1}.routePin span{position:relative;z-index:2;margin-top:5px}.routePinPrecision{position:relative;width:34px;height:82px}.routePinPrecision .pinStem{position:absolute;left:15px;top:30px;width:4px;height:30px;background:#0066cc;border-radius:4px;box-shadow:0 1px 3px #0004}.routePinPrecision .pinHandle{position:absolute;left:4px;bottom:0;width:26px;height:26px;border-radius:50%;background:#fff;border:4px solid #0066cc;box-shadow:0 2px 7px #0005;display:grid;place-items:center;color:#0066cc;font-weight:900;font-size:.72rem}.routePinPrecision .pinBase{position:absolute;left:2px;top:0;width:30px;height:38px}.routePinPrecision .pinBase:before{content:"";position:absolute;left:2px;top:0;width:26px;height:26px;border-radius:50%;background:#0066cc;border:2px solid #fff;box-shadow:0 2px 5px #0005}.routePinPrecision .pinBase:after{content:"";position:absolute;left:8px;top:20px;width:14px;height:14px;background:#0066cc;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);z-index:-1}.routePinPrecision .pinBase span{position:absolute;left:0;top:5px;width:30px;text-align:center;z-index:2}.infoBtn,.mapBtn{position:relative;background:transparent;color:#173042;width:32px;height:32px;padding:2px;line-height:1;display:grid;place-items:center}.infoBtn{font-size:1.65rem;font-weight:500}.mapBtn svg{width:24px;height:24px;display:block}.mapGlass{position:absolute;width:11px;height:11px;border:2px solid currentColor;border-radius:50%;right:1px;bottom:1px;background:#f4f7f9}.mapGlass:after{content:"";position:absolute;width:6px;height:2px;background:currentColor;right:-5px;bottom:-2px;transform:rotate(45deg);transform-origin:left center;border-radius:2px}.headerActions{display:flex;align-items:center;gap:3px}
 h1{font-size:1.25rem;margin:0}.header{display:flex;align-items:center;justify-content:space-between;background:#0066cc;color:#fff;border-radius:12px;padding:9px 10px 9px 14px;box-shadow:0 3px 10px #0066cc35}.header h1{color:#fff;font-size:1.2rem;letter-spacing:.01em}.header .infoBtn,.header .mapBtn,.header .menuBtn{color:#fff}.header .mapGlass{background:#0066cc}.menuBtn{background:transparent;color:#173042;font-size:1.45rem;padding:2px 6px;line-height:1}.menu{position:relative;right:auto;top:auto;z-index:1;flex:1;min-height:0;width:100%;max-height:none;overflow:auto}.menuItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid #e5eaed}.menuItem:last-child{border-bottom:0}.menuItemActions{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}.menuNav{display:grid;gap:8px}.menuNav button{text-align:left;padding:13px 12px;font-size:1rem}.routesPageList{display:grid;gap:7px}.historyList{display:grid;gap:7px}.historyItem{padding:10px;border:1px solid #dce5ea;border-radius:10px;background:#f9fbfc}.historyItem strong{display:block;margin-bottom:3px}.historyMeta{font-size:.76rem;color:#60727e}.historyActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
 .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 10px #0001}
 button{border:0;border-radius:9px;padding:9px 10px;font-size:.9rem;font-weight:650;background:#0066cc;color:#fff}button.active{background:#0066cc}button.secondary{background:#e8eef2;color:#173042}button:disabled{opacity:.42}
@@ -135,7 +135,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 
 <section id="mapView" class="card mapView hidden" aria-label="OpenStreetMap">
  <div id="map" class="map"></div>
- <div id="mapRouteName" class="mapRouteName">Geen route geselecteerd</div>
+ <select id="mapRouteSelect" class="mapRouteSelect" aria-label="Route selecteren"><option value="">Route selecteren…</option></select>
  <button id="mapAddPin" class="mapAddPin" type="button">＋ Nieuwe pin</button>
 </section>
 </div>
@@ -707,6 +707,44 @@ function updateMapLocation(){
  if(!mapMarker)mapMarker=L.circleMarker(p,{radius:8,weight:3,fillOpacity:.85}).addTo(map);else mapMarker.setLatLng(p);
 }
 function escapeHtml(value){return String(value??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]))}
+function renderMapRouteSelect(){
+ const sel=$('mapRouteSelect');if(!sel)return;
+ const currentName=$('routeName')?.value.trim()||'';
+ sel.innerHTML='';
+ const own=document.createElement('option');
+ own.value='';
+ own.textContent=currentName?'Huidige route: '+currentName:'Huidige route';
+ sel.appendChild(own);
+ routes.forEach((r,i)=>{
+  const o=document.createElement('option');
+  o.value=String(i);
+  o.textContent=r.name+' ('+(r.stages?.length||0)+')';
+  sel.appendChild(o);
+ });
+ sel.value='';
+}
+function selectMapRoute(value){
+ const sel=$('mapRouteSelect');
+ if(value===''){
+  testRoute=null;
+  renderMapRouteSelect();
+  updateMapRoute();
+  return;
+ }
+ const r=routes[Number(value)];
+ if(!r)return;
+ testRoute=null;
+ setupLocations=Array.from({length:10},(_,i)=>r.stages[i]?{...r.stages[i].target,radius:r.stages[i].radius||15}:null);
+ setupQuestions=Array.from({length:10},(_,i)=>r.stages[i]?.question||'');
+ setupAnswers=Array.from({length:10},(_,i)=>r.stages[i]?.answer||'');
+ saveSetup();
+ $('routeName').value=r.name;
+ selectLocation(0);
+ updateMapRoute();
+ const markers=mapRouteMarkers;
+ if(markers.length===1)map.setView(markers[0].getLatLng(),18);
+ else if(markers.length>1)map.fitBounds(L.latLngBounds(markers.map(m=>m.getLatLng())),{padding:[55,55],maxZoom:19,animate:false});
+}
 function getMapRoute(){
  if(testRoute)return testRoute;
  const stages=setupLocations.filter(Boolean).map((x,i)=>({target:{lat:x.lat,lon:x.lon},question:setupQuestions[i]||'',answer:setupAnswers[i]||''}));
@@ -777,7 +815,12 @@ function updateMapRoute(){
  if(!map)return;
  mapRouteMarkers.forEach(m=>map.removeLayer(m));mapRouteMarkers=[];
  const r=getMapRoute();
- $('mapRouteName').textContent=r?r.name:'Geen route geselecteerd';
+ renderMapRouteSelect();
+ const sel=$('mapRouteSelect');
+ if(sel){
+  const idx=r&&!testRoute?routes.findIndex(x=>x&&x.name===r.name):-1;
+  sel.value=idx>=0?String(idx):'';
+ }
  if(!r||!r.stages.length)return;
  r.stages.forEach((s,i)=>{
   const normalIcon=L.divIcon({className:'',html:'<div class="routePin"><span>'+(i+1)+'</span></div>',iconSize:[30,38],iconAnchor:[15,38]});
@@ -889,6 +932,7 @@ function hideMap(){
  showView(testRoute?'test':'setup');
 }
 $('mapButton').onclick=()=>{if(!makerAuthorized)return;if($('mapView').classList.contains('hidden'))showMap();else hideMap()};
+$('mapRouteSelect').onchange=()=>selectMapRoute($('mapRouteSelect').value);
 $('mapAddPin').onclick=startMapAddMode;
 window.addEventListener('resize',()=>{if(!$('mapView').classList.contains('hidden')){positionMapView();if(map)map.invalidateSize(true)}});
 if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});

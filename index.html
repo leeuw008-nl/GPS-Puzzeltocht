@@ -678,33 +678,12 @@ function updateMapRoute(){
   const normalIcon=L.divIcon({className:'',html:'<div class="routePin"><span>'+(i+1)+'</span></div>',iconSize:[30,38],iconAnchor:[15,38]});
   const precisionIcon=L.divIcon({className:'',html:'<div class="routePinPrecision"><div class="pinHandle">'+(i+1)+'</div><div class="pinStem"></div><div class="pinBase"><span>'+(i+1)+'</span></div></div>',iconSize:[34,82],iconAnchor:[17,38]});
   const marker=L.marker([s.target.lat,s.target.lon],{icon:normalIcon,zIndexOffset:100+i,draggable:false}).addTo(map);
-  let moveActive=false,moveSaved=null,moveCommitted=false,movePointerId=null;
-  const stopManualDrag=()=>{
+  let moveActive=false,moveSaved=null,moveCommitted=false;
+  const stopPinDrag=()=>{
    if(!moveActive)return;
    moveActive=false;
+   if(marker.dragging)marker.dragging.disable();
    map.dragging.enable();
-   window.removeEventListener('pointermove',onManualMove);
-   window.removeEventListener('pointerup',onManualUp);
-   window.removeEventListener('pointercancel',onManualUp);
-  };
-  const onManualMove=ev=>{
-   if(!moveActive||ev.pointerId!==movePointerId)return;
-   ev.preventDefault();
-   const rect=map.getContainer().getBoundingClientRect(); const point=L.point(ev.clientX-rect.left,ev.clientY-rect.top); marker.setLatLng(map.containerPointToLatLng(point));
-  };
-  const onManualUp=ev=>{
-   if(ev.pointerId!==movePointerId)return;
-   stopManualDrag();
-  };
-  const onManualDown=ev=>{
-   if(!moveActive)return;
-   ev.preventDefault();
-   ev.stopPropagation();
-   movePointerId=ev.pointerId;
-   map.dragging.disable();
-   window.addEventListener('pointermove',onManualMove,{passive:false});
-   window.addEventListener('pointerup',onManualUp);
-   window.addEventListener('pointercancel',onManualUp);
   };
   marker.on('click',()=>{
    if(!moveActive){
@@ -729,13 +708,22 @@ function updateMapRoute(){
     map.dragging.disable();
     marker.setIcon(precisionIcon);
     marker.setZIndexOffset(200+i);
-    const handle=el.querySelector('.pinHandle');
-    if(handle){
-     handle.style.touchAction='none';
-     L.DomEvent.on(handle,'pointerdown',onManualDown);
-    }
-    moveBtn.textContent='✓ Pin verplaatsen actief';
+    marker.options.draggable=true;
+    marker.dragging.enable();
     moveBtn.disabled=true;
+    moveBtn.style.display='none';
+    const q=el.querySelector('#mapQuestion'+i)?.value.trim()||'';
+    const a=el.querySelector('#mapAnswer'+i)?.value.trim()||'';
+    const saveOnly='<div class="mapEditPopup"><button type="button" class="mapSave" data-map-save="'+i+'">Opslaan</button></div>';
+    marker.getPopup().setContent(saveOnly);
+    const saveEl=marker.getPopup().getElement();
+    const saveButton=saveEl?.querySelector('[data-map-save="'+i+'"]');
+    if(saveButton)saveButton.onclick=async()=>{
+      const p=marker.getLatLng();
+      moveCommitted=true;
+      stopPinDrag();
+      await saveMapStage(i,p.lat,p.lng,q,a);
+    };
    };
    if(btn)btn.onclick=async()=>{
     const box=e.popup.getElement();
@@ -743,17 +731,9 @@ function updateMapRoute(){
     const a=box.querySelector('#mapAnswer'+i)?.value.trim()||'';
     const p=marker.getLatLng();
     moveCommitted=true;
-    stopManualDrag();
+    stopPinDrag();
     await saveMapStage(i,p.lat,p.lng,q,a);
    };
-  });
-  marker.on('popupclose',()=>{
-   stopManualDrag();
-   if(moveSaved&&!moveCommitted)marker.setLatLng(moveSaved);
-   moveSaved=null;
-   moveCommitted=false;
-   marker.setIcon(normalIcon);
-   marker.setZIndexOffset(100+i);
   });
   mapRouteMarkers.push(marker);
  });

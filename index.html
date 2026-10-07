@@ -715,7 +715,9 @@ function updateMapRoute(){
     const q=el.querySelector('#mapQuestion'+i)?.value.trim()||'';
     const a=el.querySelector('#mapAnswer'+i)?.value.trim()||'';
     const saveOnly='<div class="mapEditPopup"><button type="button" class="mapSave" data-map-save="'+i+'">Opslaan</button></div>';
-    marker.getPopup().setContent(saveOnly);
+    marker.closePopup();
+    marker.bindPopup(saveOnly,{closeOnClick:false});
+    marker.openPopup();
     const saveEl=marker.getPopup().getElement();
     const saveButton=saveEl?.querySelector('[data-map-save="'+i+'"]');
     if(saveButton)saveButton.onclick=async()=>{

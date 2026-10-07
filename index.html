@@ -862,7 +862,7 @@ function showMap(){
     map.setView(mapRouteMarkers[0].getLatLng(),18);
    }else if(mapRouteMarkers.length>1){
     const bounds=L.latLngBounds(mapRouteMarkers.map(m=>m.getLatLng()));
-    map.fitBounds(bounds,{padding:[55,55],maxZoom:18,animate:false});
+    map.fitBounds(bounds,{padding:[55,55],maxZoom:19,animate:false});
    }else if(current){
     map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));
    }

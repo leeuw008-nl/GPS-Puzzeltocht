@@ -522,6 +522,14 @@ function startTest(r,asPlayer=false){
 }
 $('backSetup').onclick=()=>{testRoute=null;playerMode=false;showView('setup')};
 
+function normalizeAnswer(value){
+ let s=String(value??'').normalize('NFKC').toUpperCase().trim();
+ s=s.replace(/^(?:CA|CIRCA|ONGEVEER)\\.?\\s+/,'');
+ s=s.replace(/[.,!?;:()[\\]{}"'’‘“”\\-_/\\\\]/g,' ');
+ s=s.replace(/\\s+/g,' ').trim();
+ if(/^\\d+(?:[.]\\d{3})+$/.test(s))s=s.replace(/\\./g,'');
+ return s;
+}
 function rad(x){return x*Math.PI/180}function deg(x){return x*180/Math.PI}function norm(x){return(x%360+360)%360}
 function distance(a,b){const R=6371000,p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function bearing(a,b){const p1=rad(a.lat),p2=rad(b.lat),dl=rad(b.lon-a.lon),y=Math.sin(dl)*Math.cos(p2),x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);return norm(deg(Math.atan2(y,x)))}
@@ -634,7 +642,7 @@ if('geolocation'in navigator)navigator.geolocation.watchPosition(onPos,onErr,{en
 startOrientation();
 $('checkAnswer').onclick=()=>{
  if(!testRoute||!reached)return;
- const s=testRoute.stages[testIndex],given=$('answer').value.trim().toUpperCase(),expected=s.answer.toUpperCase(),box=$('answerStatus');
+ const s=testRoute.stages[testIndex],given=normalizeAnswer($('answer').value),expected=normalizeAnswer(s.answer),box=$('answerStatus');
  if(given!==expected){box.className='status warn';box.textContent='Nog niet goed. Probeer opnieuw.';return}
  box.className='status ok';
  if(testIndex<testRoute.stages.length-1){

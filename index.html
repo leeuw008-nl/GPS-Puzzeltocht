@@ -531,7 +531,7 @@ function dutchNumberToWords(n){
  if(n<1000){const h=Math.floor(n/100),rest=n%100;return u[h]+'HONDERD'+(rest?dutchNumberToWords(rest):'')}
  const th=Math.floor(n/1000),rest=n%1000;return (th===1?'DUIZEND':dutchNumberToWords(th)+'DUIZEND')+(rest?dutchNumberToWords(rest):'');
 }
-const DUTCH_WORD_NUMBERS=(()=>{const m=new Map();for(let i=0;i<=9999;i++){const w=dutchNumberToWords(i);if(w)m.set(w,String(i))}return m})();
+const DUTCH_WORD_NUMBERS=(()=>{const m=new Map();for(let i=0;i<=9999;i++){const w=dutchNumberToWords(i);if(w)m.set(w,String(i));if(i>=100){const h=Math.floor(i/100),r=i%100;if(r)m.set(dutchNumberToWords(h*1000/100).replace('DUIZEND','')+dutchNumberToWords(r),String(i))}}return m})();
 function normalizeAnswer(value){
  let s=String(value??'').normalize('NFKC').toUpperCase().trim();
  s=s.replace(/^(?:CA|CIRCA|ONGEVEER)\\.?\\s+/,'');

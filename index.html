@@ -690,7 +690,7 @@ function updateMapRoute(){
   const onManualMove=ev=>{
    if(!moveActive||ev.pointerId!==movePointerId)return;
    ev.preventDefault();
-   marker.setLatLng(map.mouseEventToLatLng(ev));
+   const rect=map.getContainer().getBoundingClientRect(); const point=L.point(ev.clientX-rect.left,ev.clientY-rect.top); marker.setLatLng(map.containerPointToLatLng(point));
   };
   const onManualUp=ev=>{
    if(ev.pointerId!==movePointerId)return;
@@ -732,7 +732,7 @@ function updateMapRoute(){
     const handle=el.querySelector('.pinHandle');
     if(handle){
      handle.style.touchAction='none';
-     handle.onpointerdown=onManualDown;
+     L.DomEvent.on(handle,'pointerdown',onManualDown);
     }
     moveBtn.textContent='✓ Pin verplaatsen actief';
     moveBtn.disabled=true;

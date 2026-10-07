@@ -855,7 +855,17 @@ function showMap(){
   setTimeout(()=>{
    positionMapView();
    map.invalidateSize(true);
-   if(current)map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));
+
+   // Toon bij het openen van een route alle pinnen tegelijk.
+   // De kaart wordt gecentreerd op de route en krijgt rondom een kleine marge.
+   if(mapRouteMarkers.length===1){
+    map.setView(mapRouteMarkers[0].getLatLng(),18);
+   }else if(mapRouteMarkers.length>1){
+    const bounds=L.latLngBounds(mapRouteMarkers.map(m=>m.getLatLng()));
+    map.fitBounds(bounds,{padding:[55,55],maxZoom:18,animate:false});
+   }else if(current){
+    map.setView([current.lat,current.lon],Math.max(map.getZoom(),15));
+   }
    updateMapLocation();
   },80);
  });

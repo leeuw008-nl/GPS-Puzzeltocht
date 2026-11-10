@@ -82,6 +82,12 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
   <label class="wide">Aankomstradius: <strong id="radiusValue">15</strong> m
    <input id="radius" type="range" min="5" max="50" value="15" step="5">
   </label>
+  <label class="wide">Gesproken aanwijzing onderweg
+   <textarea id="spokenDirection" rows="2" placeholder="Bijvoorbeeld: Loop rechtdoor tot aan de brug en houd daar rechts aan."></textarea>
+  </label>
+  <label class="wide">Gesproken informatie bij het object
+   <textarea id="spokenInfo" rows="3" placeholder="Vertel hier iets over het gebouw, monument of object."></textarea>
+  </label>
   <label class="wide">Vraag voor deze locatie
    <textarea id="question" rows="2" placeholder="Omschrijf hier de vraag of opdracht"></textarea>
   </label>
@@ -103,6 +109,11 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <section id="test" class="test hidden">
  <div class="card playerRouteSelect playerOnly" style="padding:8px 10px">
   <div class="topline"><strong>Route</strong><select id="playerRouteSelect" style="flex:1;min-width:0"><option value="">Kies een route…</option></select></div>
+ </div>
+ <div class="card playerOnly" style="padding:8px 10px">
+  <div class="actions"><button id="voiceStart" type="button">🔊 Gesproken begeleiding starten</button><button id="voiceRepeat" type="button" class="secondary">↻ Herhaal</button></div>
+  <div class="actions" style="margin-top:6px"><button id="voicePause" type="button" class="secondary">Ⅱ Pauze / verder</button><button id="voiceStop" type="button" class="secondary">■ Stop gesproken tekst</button></div>
+  <div id="voiceStatus" class="compact" style="margin-top:5px">Gesproken begeleiding staat uit.</div>
  </div>
  <div class="card playerHero playerOnly" id="playerHero">
   <h2 id="playerTitle">GPS Puzzeltocht</h2>
@@ -143,7 +154,7 @@ input,select,textarea{font:inherit;border:1px solid #ccd7dd;border-radius:8px;pa
 <script>
 const $=id=>document.getElementById(id);
 let current=null,deviceHeading=null,orientationStarted=false,usingAbsolute=false;
-let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
+let playerMode=false,selected=0,setupLocations=[],setupQuestions=[],setupAnswers=[],setupSpokenDirections=[],setupSpokenInfo=[],routes=[],testRoute=null,testIndex=0,target=null,reached=false,map=null,mapMarker=null,mapRouteMarkers=[],infoReturn='setup';
 let playerProgress=null;
 let mapAddMode=false,mapAddHandler=null,mapAddMarker=null;
 let makerAuthorized=false;
@@ -195,6 +206,10 @@ function load(){
  try{setupAnswers=JSON.parse(localStorage.getItem('gpsPuzzleAnswers')||'[]')}catch{setupAnswers=[]}
  setupQuestions=Array.from({length:10},(_,i)=>String(setupQuestions[i]||''));
  setupAnswers=Array.from({length:10},(_,i)=>String(setupAnswers[i]||''));
+ try{setupSpokenDirections=JSON.parse(localStorage.getItem('gpsPuzzleSpokenDirections')||'[]')}catch{setupSpokenDirections=[]}
+ try{setupSpokenInfo=JSON.parse(localStorage.getItem('gpsPuzzleSpokenInfo')||'[]')}catch{setupSpokenInfo=[]}
+ setupSpokenDirections=Array.from({length:10},(_,i)=>String(setupSpokenDirections[i]||''));
+ setupSpokenInfo=Array.from({length:10},(_,i)=>String(setupSpokenInfo[i]||''));
  setupLocations=Array.from({length:10},(_,i)=>{
   const x=setupLocations[i];
   if(!x)return null;
@@ -202,7 +217,7 @@ function load(){
  });
  renderRoutes();renderRoutesPage();renderSlots();selectLocation(0);
 }
-function saveSetup(){localStorage.setItem('gpsPuzzleLocations',JSON.stringify(setupLocations));localStorage.setItem('gpsPuzzleQuestions',JSON.stringify(setupQuestions));localStorage.setItem('gpsPuzzleAnswers',JSON.stringify(setupAnswers))}
+function saveSetup(){localStorage.setItem('gpsPuzzleLocations',JSON.stringify(setupLocations));localStorage.setItem('gpsPuzzleQuestions',JSON.stringify(setupQuestions));localStorage.setItem('gpsPuzzleAnswers',JSON.stringify(setupAnswers));localStorage.setItem('gpsPuzzleSpokenDirections',JSON.stringify(setupSpokenDirections));localStorage.setItem('gpsPuzzleSpokenInfo',JSON.stringify(setupSpokenInfo))}
 function renderSlots(){
  $('slots').innerHTML='';
  setupLocations.forEach((x,i)=>{
@@ -216,12 +231,16 @@ function selectLocation(i){
  $('selectedCoord').textContent=x?fmtCoord(x):'nog niet ingesteld';$('latitudeInput').value=x?String(x.lat):'';$('longitudeInput').value=x?String(x.lon):'';
  $('radius').value=x?.radius||15;$('radiusValue').textContent=x?.radius||15;
  $('question').value=setupQuestions[i]||'';$('answerSetup').value=setupAnswers[i]||'';
+ $('spokenDirection').value=setupSpokenDirections[i]||'';
+ $('spokenInfo').value=setupSpokenInfo[i]||'';
  $('setupStatus').textContent=x?'✓ Locatie '+(i+1)+' ingesteld. Pas evt. aankomstradius aan.':'';
  renderSlots();
 }
 $('radius').oninput=()=>{const v=Number($('radius').value);$('radiusValue').textContent=v;if(setupLocations[selected]){setupLocations[selected].radius=v;saveSetup()}};
 $('question').oninput=()=>{setupQuestions[selected]=$('question').value;saveSetup()};
 $('answerSetup').oninput=()=>{setupAnswers[selected]=$('answerSetup').value;saveSetup()};
+$('spokenDirection').oninput=()=>{setupSpokenDirections[selected]=$('spokenDirection').value;saveSetup()};
+$('spokenInfo').oninput=()=>{setupSpokenInfo[selected]=$('spokenInfo').value;saveSetup()};
 function requestCurrentPosition(){
  if(!('geolocation' in navigator)){
   $('setupStatus').className='status warn';
@@ -269,7 +288,7 @@ function routeReady(){return setupLocations.some(Boolean)}
 function makeRoute(name){
  const stages=setupLocations.filter(Boolean).map((x,i)=>({
   title:'Locatie '+(i+1),clue:i===0?'Volg de pijl naar locatie 1.':'Goed gedaan. Ga nu naar locatie '+(i+1)+'.',
-  target:{lat:x.lat,lon:x.lon},radius:x.radius,question:setupQuestions[i]?.trim()||'Testvraag bij locatie '+(i+1)+'.',answer:setupAnswers[i]?.trim()||String(i+1)
+  target:{lat:x.lat,lon:x.lon},radius:x.radius,question:setupQuestions[i]?.trim()||'Testvraag bij locatie '+(i+1)+'.',answer:setupAnswers[i]?.trim()||String(i+1),spokenDirection:setupSpokenDirections[i]?.trim()||'',spokenInfo:setupSpokenInfo[i]?.trim()||''
  }));
  return{name:name.trim()||'Nieuwe route',stages,created:new Date().toISOString()};
 }
@@ -347,7 +366,7 @@ function editRoute(i){
  playerMode=false;playerProgress=null;testRoute=null;
  setupLocations=Array.from({length:10},(_,n)=>r.stages[n]?{...r.stages[n].target,radius:r.stages[n].radius||15}:null);
  setupQuestions=Array.from({length:10},(_,n)=>r.stages[n]?.question||'');
- setupAnswers=Array.from({length:10},(_,n)=>r.stages[n]?.answer||'');
+ setupAnswers=Array.from({length:10},(_,n)=>r.stages[n]?.answer||'');setupSpokenDirections=Array.from({length:10},(_,n)=>r.stages[n]?.spokenDirection||'');setupSpokenInfo=Array.from({length:10},(_,n)=>r.stages[n]?.spokenInfo||'');
  saveSetup();$('routeName').value=r.name;selectLocation(0);$('savedRoutes').value=String(i);$('menu').classList.add('hidden');
  showView('setup');
 }
@@ -371,7 +390,7 @@ $('savedRoutes').onchange=()=>{
  const r=routes[Number($('savedRoutes').value)];if(!r)return;
  setupLocations=Array.from({length:10},(_,i)=>r.stages[i]?{...r.stages[i].target,radius:r.stages[i].radius||15}:null);
  setupQuestions=Array.from({length:10},(_,i)=>r.stages[i]?.question||'');
- setupAnswers=Array.from({length:10},(_,i)=>r.stages[i]?.answer||'');
+ setupAnswers=Array.from({length:10},(_,i)=>r.stages[i]?.answer||'');setupSpokenDirections=Array.from({length:10},(_,i)=>r.stages[i]?.spokenDirection||'');setupSpokenInfo=Array.from({length:10},(_,i)=>r.stages[i]?.spokenInfo||'');
  saveSetup();$('routeName').value=r.name;selectLocation(0);
 };
 $('testSaved').onclick=()=>{
@@ -384,7 +403,7 @@ $('testCurrent').onclick=()=>{
  startTest(makeRoute($('routeName').value),true);
 };
 $('newRoute').onclick=()=>{
- testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
+ testRoute=null;testIndex=0;setupLocations=[];setupQuestions=Array(10).fill('');setupAnswers=Array(10).fill('');setupSpokenDirections=Array(10).fill('');setupSpokenInfo=Array(10).fill('');$('routeName').value='';saveSetup();selectLocation(0);
 };
 const PLAYER_HISTORY_KEY='gpsPuzzlePlayerHistory';
 function loadPlayerHistory(){
@@ -539,7 +558,9 @@ $('backSetup').onclick=()=>{
 };
 
 function startTest(r,asPlayer=false){
- playerMode=!!asPlayer;
+ playerMode=!!asPlayer;voiceEnabled=false;lastSpokenTexts=[];
+ $('voiceStatus').textContent='Gesproken begeleiding staat uit. Druk op “Gesproken begeleiding starten”.';
+ $('voiceStart').textContent='🔊 Gesproken begeleiding starten';
  playerProgress=null;
  testRoute=r;testIndex=0;reached=false;target=r.stages[0].target;
  $('testRouteName').textContent=r.name;$('backSetup').textContent=playerMode?'← Home':'← Bewerken';populatePlayerRoutes(r);showView('test');updatePlayerView();
@@ -547,6 +568,17 @@ function startTest(r,asPlayer=false){
 }
 $('backSetup').onclick=()=>{testRoute=null;playerMode=false;showView('setup')};
 
+function speakSequence(texts,statusText){
+ const clean=(texts||[]).map(x=>String(x||'').trim()).filter(Boolean);lastSpokenTexts=clean;
+ if(!voiceEnabled||!clean.length||!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window))return;
+ speechSynthesis.cancel();
+ const run=i=>{if(!voiceEnabled||i>=clean.length)return;const u=new SpeechSynthesisUtterance(clean[i]);u.lang='nl-NL';u.rate=0.95;u.pitch=1;u.onend=()=>run(i+1);u.onerror=()=>{$('voiceStatus').textContent='Spraak kon niet worden afgespeeld. Controleer de spraakinstellingen van je telefoon.'};speechSynthesis.speak(u)};
+ $('voiceStatus').textContent=statusText||'Gesproken tekst wordt afgespeeld.';run(0);
+}
+$('voiceStart').onclick=()=>{if(!('speechSynthesis'in window)){$('voiceStatus').textContent='Deze browser ondersteunt geen gesproken tekst.';return}voiceEnabled=true;$('voiceStart').textContent='🔊 Gesproken begeleiding actief';const st=testRoute?.stages?.[testIndex];speakSequence([st?.spokenDirection||('Je bent onderweg naar locatie '+(testIndex+1)+'.')],'Gesproken begeleiding is ingeschakeld.')};
+$('voiceRepeat').onclick=()=>{if(!voiceEnabled){$('voiceStatus').textContent='Start eerst de gesproken begeleiding.';return}speakSequence(lastSpokenTexts,'Gesproken tekst wordt herhaald.')};
+$('voicePause').onclick=()=>{if(!voiceEnabled||!('speechSynthesis'in window))return;if(speechSynthesis.speaking&&!speechSynthesis.paused){speechSynthesis.pause();$('voiceStatus').textContent='Gesproken tekst gepauzeerd.'}else if(speechSynthesis.paused){speechSynthesis.resume();$('voiceStatus').textContent='Gesproken tekst wordt hervat.'}};
+$('voiceStop').onclick=()=>{voiceEnabled=false;if('speechSynthesis'in window)speechSynthesis.cancel();$('voiceStart').textContent='🔊 Gesproken begeleiding starten';$('voiceStatus').textContent='Gesproken begeleiding gestopt.'};
 function rad(x){return x*Math.PI/180}function deg(x){return x*180/Math.PI}function norm(x){return(x%360+360)%360}
 function distance(a,b){const R=6371000,p1=rad(a.lat),p2=rad(b.lat),dp=rad(b.lat-a.lat),dl=rad(b.lon-a.lon),h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function bearing(a,b){const p1=rad(a.lat),p2=rad(b.lat),dl=rad(b.lon-a.lon),y=Math.sin(dl)*Math.cos(p2),x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);return norm(deg(Math.atan2(y,x)))}
@@ -555,7 +587,7 @@ function smoothHeading(next){if(deviceHeading===null){deviceHeading=next;return}
 function handleAbsolute(e){if(typeof e.alpha!=='number'||!isFinite(e.alpha))return;let h=norm(360-e.alpha),a=screen.orientation?.angle||0;h=norm(h+a);smoothHeading(h);usingAbsolute=true;orientationStarted=true;update()}
 function handleFallback(e){if(usingAbsolute)return;if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading)){smoothHeading(e.webkitCompassHeading);orientationStarted=true;update()}}
 function startOrientation(){if(orientationStarted)return;window.addEventListener('deviceorientationabsolute',handleAbsolute,true);window.addEventListener('deviceorientation',handleFallback,true);if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function')DeviceOrientationEvent.requestPermission(true).catch(()=>{})}
-function setStage(){const s=testRoute?.stages[testIndex];if(!s)return;target=s.target;reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('clueTitle').textContent=s.title;$('clue').textContent=s.clue}
+function setStage(){const s=testRoute?.stages[testIndex];if(!s)return;target=s.target;reached=false;$('puzzle').classList.add('hidden');$('answer').value='';$('answerStatus').className='status hidden';$('clueTitle').textContent=s.title;$('clue').textContent=s.clue;if(voiceEnabled&&s.spokenDirection)speakSequence([s.spokenDirection],'Onderweg naar locatie '+(testIndex+1)+'.')}
 function update(){
  if(!current)return;
  $('accuracy').textContent=Math.round(current.accuracy);$('target').textContent=fmtCoord(target);
@@ -570,6 +602,7 @@ function update(){
    reached=true;
    $('puzzleQuestion').textContent=s.question;
    $('puzzle').classList.remove('hidden');
+   if(voiceEnabled)speakSequence([s.spokenInfo,s.question].filter(Boolean),'Locatie '+(testIndex+1)+' bereikt.');
    if(playerMode){
     $('playerTitle').textContent='🎯 Locatie '+(testIndex+1)+' gevonden!';$('playerHero').classList.add('locationFound');$('playerHero').classList.remove('routeComplete');
     $('playerInstruction').textContent='Los de puzzel op om verder te gaan naar de volgende locatie.';
